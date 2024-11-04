@@ -34,7 +34,7 @@ resource "azurerm_eventgrid_domain_topic" "this" {
 }
 
 # subscriptions
-resource "azurerm_eventgrid_event_subscription" "subscriptions" {
+resource "azurerm_eventgrid_event_subscription" "this" {
   for_each = merge({
     # domain topic subscriptions
     for item in flatten([
