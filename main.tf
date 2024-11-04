@@ -4,7 +4,10 @@ resource "azurerm_eventgrid_domain" "this" {
     var.config, "domains", {}
   )
 
-  name                = "${var.config.name}-${each.key}"
+  name = try(
+    each.value.name, join("-", [var.naming.eventgrid_domain, each.key])
+  )
+
   resource_group_name = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
   location            = coalesce(lookup(var.config, "location", null), var.location)
   tags                = try(var.config.tags, var.tags, null)
@@ -18,35 +21,40 @@ resource "azurerm_eventgrid_domain_topic" "this" {
       "${domain_key}-${topic_key}" => {
         domain_name = azurerm_eventgrid_domain.this[domain_key].name
         domain_key  = domain_key
+        name = try(
+          topic.name, join("-", [var.naming.eventgrid_domain_topic, topic_key])
+        )
       }
     }
   ])...)
 
-  name                = each.key
+  name                = each.value.name
   domain_name         = each.value.domain_name
   resource_group_name = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
 }
 
 # subscriptions
 resource "azurerm_eventgrid_event_subscription" "subscriptions" {
-  for_each = merge(
+  for_each = merge({
     # domain topic subscriptions
-    {
-      for item in flatten([
-        for domain_key, domain in lookup(var.config, "domains", {}) : [
-          for topic_key, topic in lookup(domain, "domain_topics", {}) : [
-            for sub_key, sub in lookup(topic, "event_subscriptions", {}) : {
-              id           = "${domain_key}-${topic_key}-${sub_key}"
-              domain_key   = domain_key
-              topic_key    = topic_key
-              subscription = sub
-            }
-          ]
+    for item in flatten([
+      for domain_key, domain in lookup(var.config, "domains", {}) : [
+        for topic_key, topic in lookup(domain, "domain_topics", {}) : [
+          for sub_key, sub in lookup(topic, "event_subscriptions", {}) : {
+            id           = "${domain_key}-${topic_key}-${sub_key}"
+            domain_key   = domain_key
+            topic_key    = topic_key
+            subscription = sub
+            name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key]))
+          }
         ]
-        ]) : item.id => {
-        scope        = azurerm_eventgrid_domain_topic.this["${item.domain_key}-${item.topic_key}"].id
-        subscription = item.subscription
-      }
+      ]
+      ]) : item.id => {
+
+      name         = item.name
+      scope        = azurerm_eventgrid_domain_topic.this["${item.domain_key}-${item.topic_key}"].id
+      subscription = item.subscription
+    }
     },
     # custom topic subscriptions
     {
@@ -56,9 +64,12 @@ resource "azurerm_eventgrid_event_subscription" "subscriptions" {
             id           = "${topic_key}-${sub_key}"
             topic_key    = topic_key
             subscription = sub
+            name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key]))
           }
         ]
         ]) : item.id => {
+
+        name         = item.name
         scope        = azurerm_eventgrid_topic.this[item.topic_key].id
         subscription = item.subscription
       }
@@ -68,11 +79,12 @@ resource "azurerm_eventgrid_event_subscription" "subscriptions" {
       for key, sub in lookup(var.config, "event_subscriptions", {}) : key => {
         scope        = sub.scope
         subscription = sub
+        name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, key]))
       }
     }
   )
 
-  name                  = each.key
+  name                  = each.value.name
   scope                 = each.value.scope
   event_delivery_schema = try(each.value.subscription.event_delivery_schema, null)
   included_event_types  = try(each.value.subscription.included_event_types, null)
@@ -110,14 +122,9 @@ resource "azurerm_eventgrid_event_subscription" "subscriptions" {
   }
 
   dynamic "subject_filter" {
-    for_each = coalesce(
-      lookup(each.value.subscription, "subject_filter", null),
-      lookup(each.value.subscription, "filters", null),
-      null
-      ) != null ? [coalesce(
-        lookup(each.value.subscription, "subject_filter", null),
-        lookup(each.value.subscription, "filters", null)
-    )] : []
+    for_each = contains(keys(each.value.subscription), "subject_filter") ? [each.value.subscription.subject_filter] : (
+      contains(keys(each.value.subscription), "filters") ? [each.value.subscription.filters] : []
+    )
     content {
       subject_begins_with = lookup(subject_filter.value, "subject_begins_with", "/")
       subject_ends_with   = lookup(subject_filter.value, "subject_ends_with", null)
@@ -244,7 +251,6 @@ resource "azurerm_eventgrid_system_topic" "this" {
   source_arm_resource_id = each.value.source_arm_resource_id
   topic_type             = each.value.topic_type
   tags                   = try(var.config.tags, var.tags, null)
-
 }
 
 # system topic event subscriptions
@@ -323,11 +329,14 @@ resource "azurerm_eventgrid_topic" "this" {
     var.config, "custom_topics", {}
   )
 
-  name                          = "${var.config.name}-${each.key}"
+  name = try(
+    each.value.name, join("-", [var.naming.eventgrid_topic, each.key])
+  )
+
   resource_group_name           = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
   location                      = coalesce(lookup(var.config, "location", null), var.location)
   input_schema                  = each.value.input_schema
   public_network_access_enabled = each.value.public_network_access_enabled
-  local_auth_enabled            = each.value.local_auth_enabled
+  local_auth_enabled            = try(each.value.local_auth_enabled, false)
   tags                          = try(var.config.tags, var.tags, null)
 }

@@ -68,9 +68,8 @@ module "storage" {
 }
 
 module "eventgrid" {
-  #source  = "cloudnationhq/eg/azure"
-  #version = "~> 2.0"
-  source = "../../"
+  source  = "cloudnationhq/eg/azure"
+  version = "~> 1.0"
 
   config = {
     name           = module.naming.eventgrid_domain.name

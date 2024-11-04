@@ -57,9 +57,10 @@ module "servicebus" {
 }
 
 module "eventgrid" {
-  #source  = "cloudnationhq/eg/azure"
-  #version = "~> 0.1"
-  source = "../../"
+  source  = "cloudnationhq/eg/azure"
+  version = "~> 1.0"
+
+  naming = local.naming
 
   config = {
     name           = module.naming.eventgrid_domain.name
