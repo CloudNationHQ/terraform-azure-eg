@@ -81,7 +81,7 @@ module "eventgrid" {
         source_arm_resource_id = module.storage.account.id
         topic_type             = "Microsoft.Storage.StorageAccounts"
 
-        event_subsciptions = local.event_subscriptions
+        event_subscriptions = local.event_subscriptions
       }
     }
   }

@@ -107,7 +107,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   )
 
   dynamic "azure_function_endpoint" {
-    for_each = lookup(each.value.subscription, "azure_function_endpoint", null) != null ? [lookup(each.value.subscription, "azure_function_endpoint", null)] : []
+    for_each = lookup(each.value.subscription, "azure_function_endpoint", null) != null ? { "default" = each.value.subscription.azure_function_endpoint } : {}
 
     content {
       function_id = azure_function_endpoint.value.function_id
@@ -115,14 +115,16 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "webhook_endpoint" {
-    for_each = lookup(each.value.subscription, "webhook_endpoint", null) != null ? [lookup(each.value.subscription, "webhook_endpoint", null)] : []
+    for_each = lookup(each.value.subscription, "webhook_endpoint", null) != null ? { "default" = each.value.subscription.webhook_endpoint } : {}
+
     content {
       url = webhook_endpoint.value.url
     }
   }
 
   dynamic "retry_policy" {
-    for_each = lookup(each.value.subscription, "retry_policy", null) != null ? [lookup(each.value.subscription, "retry_policy", null)] : []
+    for_each = lookup(each.value.subscription, "retry_policy", null) != null ? { "default" = each.value.subscription.retry_policy } : {}
+
     content {
       max_delivery_attempts = retry_policy.value.max_delivery_attempts
       event_time_to_live    = retry_policy.value.event_time_to_live
@@ -141,7 +143,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "advanced_filter" {
-    for_each = lookup(each.value.subscription, "advanced_filter", null) != null ? [lookup(each.value.subscription, "advanced_filter", null)] : []
+    for_each = lookup(each.value.subscription, "advanced_filter", null) != null ? { "default" = each.value.subscription.advanced_filter } : {}
 
     content {
       dynamic "bool_equals" {
@@ -295,15 +297,25 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   service_bus_topic_endpoint_id = each.value.service_bus_topic_endpoint_id
   eventhub_endpoint_id          = each.value.eventhub_endpoint_id
 
+  dynamic "azure_function_endpoint" {
+    for_each = lookup(each.value, "azure_function_endpoint", null) != null ? { "default" = each.value.azure_function_endpoint } : {}
+
+    content {
+      function_id = azure_function_endpoint.value.function_id
+    }
+  }
+
   dynamic "webhook_endpoint" {
-    for_each = each.value.webhook_endpoint != null ? [each.value.webhook_endpoint] : []
+    for_each = lookup(each.value, "webhook_endpoint", null) != null ? { "default" = each.value.webhook_endpoint } : {}
+
     content {
       url = webhook_endpoint.value.url
     }
   }
 
   dynamic "subject_filter" {
-    for_each = each.value.subject_filter != null ? [each.value.subject_filter] : []
+    for_each = lookup(each.value, "subject_filter", null) != null ? { "default" = each.value.subject_filter } : {}
+
     content {
       subject_begins_with = lookup(subject_filter.value, "subject_begins_with", "/")
       subject_ends_with   = lookup(subject_filter.value, "subject_ends_with", null)
@@ -312,7 +324,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "retry_policy" {
-    for_each = each.value.retry_policy != null ? [each.value.retry_policy] : []
+    for_each = lookup(each.value, "retry_policy", null) != null ? { "default" = each.value.retry_policy } : {}
     content {
       max_delivery_attempts = retry_policy.value.max_delivery_attempts
       event_time_to_live    = retry_policy.value.event_time_to_live
@@ -327,6 +339,101 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
       value        = lookup(delivery_property.value, "value", null)
       source_field = lookup(delivery_property.value, "source_field", null)
       secret       = lookup(delivery_property.value, "secret", null)
+    }
+  }
+
+  dynamic "advanced_filter" {
+    for_each = lookup(each.value, "advanced_filter", null) != null ? { "default" = each.value.advanced_filter } : {}
+
+    content {
+      dynamic "bool_equals" {
+        for_each = lookup(
+          advanced_filter.value, "bool_equals", {}
+        )
+
+        content {
+          key   = bool_equals.key
+          value = bool_equals.value
+        }
+      }
+
+      dynamic "number_greater_than" {
+        for_each = lookup(advanced_filter.value, "number_greater_than", {})
+        content {
+          key   = number_greater_than.key
+          value = number_greater_than.value
+        }
+      }
+      dynamic "number_greater_than_or_equals" {
+        for_each = lookup(advanced_filter.value, "number_greater_than_or_equals", {})
+        content {
+          key   = number_greater_than_or_equals.key
+          value = number_greater_than_or_equals.value
+        }
+      }
+      dynamic "number_less_than" {
+        for_each = lookup(advanced_filter.value, "number_less_than", {})
+        content {
+          key   = number_less_than.key
+          value = number_less_than.value
+        }
+      }
+      dynamic "number_less_than_or_equals" {
+        for_each = lookup(advanced_filter.value, "number_less_than_or_equals", {})
+        content {
+          key   = number_less_than_or_equals.key
+          value = number_less_than_or_equals.value
+        }
+      }
+      dynamic "number_in" {
+        for_each = lookup(advanced_filter.value, "number_in", {})
+        content {
+          key    = number_in.key
+          values = number_in.value
+        }
+      }
+      dynamic "number_not_in" {
+        for_each = lookup(advanced_filter.value, "number_not_in", {})
+        content {
+          key    = number_not_in.key
+          values = number_not_in.value
+        }
+      }
+      dynamic "string_begins_with" {
+        for_each = lookup(advanced_filter.value, "string_begins_with", {})
+        content {
+          key    = string_begins_with.key
+          values = string_begins_with.value
+        }
+      }
+      dynamic "string_ends_with" {
+        for_each = lookup(advanced_filter.value, "string_ends_with", {})
+        content {
+          key    = string_ends_with.key
+          values = string_ends_with.value
+        }
+      }
+      dynamic "string_contains" {
+        for_each = lookup(advanced_filter.value, "string_contains", {})
+        content {
+          key    = string_contains.key
+          values = string_contains.value
+        }
+      }
+      dynamic "string_in" {
+        for_each = lookup(advanced_filter.value, "string_in", {})
+        content {
+          key    = string_in.key
+          values = string_in.value
+        }
+      }
+      dynamic "string_not_in" {
+        for_each = lookup(advanced_filter.value, "string_not_in", {})
+        content {
+          key    = string_not_in.key
+          values = string_not_in.value
+        }
+      }
     }
   }
 }
@@ -347,4 +454,28 @@ resource "azurerm_eventgrid_topic" "this" {
   public_network_access_enabled = each.value.public_network_access_enabled
   local_auth_enabled            = try(each.value.local_auth_enabled, false)
   tags                          = try(var.config.tags, var.tags, null)
+  inbound_ip_rule               = try(each.value.inbound_ip_rule, null)
+
+  dynamic "input_mapping_fields" {
+    for_each = lookup(each.value, "input_mapping_fields", null) != null ? { "default" = each.value.input_mapping_fields } : {}
+
+    content {
+      id           = try(input_mapping_fields.value.id, null)
+      topic        = try(input_mapping_fields.value.topic, null)
+      subject      = try(input_mapping_fields.value.subject, null)
+      event_time   = try(input_mapping_fields.value.event_time, null)
+      event_type   = try(input_mapping_fields.value.event_type, null)
+      data_version = try(input_mapping_fields.value.data_version, null)
+    }
+  }
+
+  dynamic "input_mapping_default_values" {
+    for_each = lookup(each.value, "input_mapping_default_values", null) != null ? { "default" = each.value.input_mapping_default_values } : {}
+
+    content {
+      data_version = try(input_mapping_default_values.value.data_version, null)
+      event_type   = try(input_mapping_default_values.value.event_type, null)
+      subject      = try(input_mapping_default_values.value.subject, null)
+    }
+  }
 }
