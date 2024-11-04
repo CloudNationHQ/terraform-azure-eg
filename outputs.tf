@@ -4,26 +4,26 @@ output "domains" {
 }
 
 output "domain_topics" {
-  description = "contains eventgrid domain topics configuration"
+  description = "contains domain topics configuration"
   value       = azurerm_eventgrid_domain_topic.this
 }
 
 output "event_subscriptions" {
-  description = "contains eventgrid event subscriptions configuration"
+  description = "contains event subscriptions configuration"
   value       = azurerm_eventgrid_event_subscription.this
 }
 
 output "system_topics" {
-  description = "contains eventgrid system topics configuration"
+  description = "contains system topics configuration"
   value       = azurerm_eventgrid_system_topic.this
 }
 
 output "system_topic_event_subscriptions" {
-  description = "contains eventgrid system topic event subscriptions configuration"
+  description = "contains system topic event subscriptions configuration"
   value       = azurerm_eventgrid_system_topic_event_subscription.this
 }
 
 output "custom_topics" {
-  description = "contains eventgrid custom topics configuration"
+  description = "contains custom topics configuration"
   value       = azurerm_eventgrid_topic.this
 }

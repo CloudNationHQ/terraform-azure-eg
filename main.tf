@@ -106,10 +106,18 @@ resource "azurerm_eventgrid_event_subscription" "this" {
     lookup(each.value.subscription, "endpoint_id", null) : null
   )
 
-  dynamic "webhook_endpoint" {
-    for_each = lookup(each.value.subscription, "endpoint_type", null) == "webhook" ? [1] : []
+  dynamic "azure_function_endpoint" {
+    for_each = lookup(each.value.subscription, "azure_function_endpoint", null) != null ? [lookup(each.value.subscription, "azure_function_endpoint", null)] : []
+
     content {
-      url = lookup(each.value.subscription, "endpoint_url", null)
+      function_id = azure_function_endpoint.value.function_id
+    }
+  }
+
+  dynamic "webhook_endpoint" {
+    for_each = lookup(each.value.subscription, "webhook_endpoint", null) != null ? [lookup(each.value.subscription, "webhook_endpoint", null)] : []
+    content {
+      url = webhook_endpoint.value.url
     }
   }
 

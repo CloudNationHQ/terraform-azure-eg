@@ -71,12 +71,12 @@ End-to-end testing is not conducted on these modules, as they are individual com
 
 | Name | Description |
 |------|-------------|
-| <a name="output_custom_topics"></a> [custom\_topics](#output\_custom\_topics) | contains eventgrid custom topics configuration |
-| <a name="output_domain_topics"></a> [domain\_topics](#output\_domain\_topics) | contains eventgrid domain topics configuration |
+| <a name="output_custom_topics"></a> [custom\_topics](#output\_custom\_topics) | contains custom topics configuration |
+| <a name="output_domain_topics"></a> [domain\_topics](#output\_domain\_topics) | contains domain topics configuration |
 | <a name="output_domains"></a> [domains](#output\_domains) | contains eventgrid domains configuration |
-| <a name="output_event_subscriptions"></a> [event\_subscriptions](#output\_event\_subscriptions) | contains eventgrid event subscriptions configuration |
-| <a name="output_system_topic_event_subscriptions"></a> [system\_topic\_event\_subscriptions](#output\_system\_topic\_event\_subscriptions) | contains eventgrid system topic event subscriptions configuration |
-| <a name="output_system_topics"></a> [system\_topics](#output\_system\_topics) | contains eventgrid system topics configuration |
+| <a name="output_event_subscriptions"></a> [event\_subscriptions](#output\_event\_subscriptions) | contains event subscriptions configuration |
+| <a name="output_system_topic_event_subscriptions"></a> [system\_topic\_event\_subscriptions](#output\_system\_topic\_event\_subscriptions) | contains system topic event subscriptions configuration |
+| <a name="output_system_topics"></a> [system\_topics](#output\_system\_topics) | contains system topics configuration |
 <!-- END_TF_DOCS -->
 
 ## Testing
