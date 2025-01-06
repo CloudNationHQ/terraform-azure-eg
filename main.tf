@@ -10,7 +10,10 @@ resource "azurerm_eventgrid_domain" "this" {
 
   resource_group_name = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
   location            = coalesce(lookup(var.config, "location", null), var.location)
-  tags                = try(var.config.tags, var.tags, null)
+
+  tags = try(
+    var.config.tags, var.tags, null
+  )
 }
 
 # domain topics
@@ -45,7 +48,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             domain_key   = domain_key
             topic_key    = topic_key
             subscription = sub
-            name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key]))
+            name = try(
+              sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key])
+            )
           }
         ]
       ]
@@ -64,7 +69,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             id           = "${topic_key}-${sub_key}"
             topic_key    = topic_key
             subscription = sub
-            name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key]))
+            name = try(
+              sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key])
+            )
           }
         ]
         ]) : item.id => {
@@ -84,11 +91,14 @@ resource "azurerm_eventgrid_event_subscription" "this" {
     }
   )
 
-  name                  = each.value.name
-  scope                 = each.value.scope
-  event_delivery_schema = try(each.value.subscription.event_delivery_schema, null)
-  included_event_types  = try(each.value.subscription.included_event_types, null)
-  labels                = try(each.value.subscription.labels, null)
+  name                                 = each.value.name
+  scope                                = each.value.scope
+  event_delivery_schema                = try(each.value.subscription.event_delivery_schema, null)
+  included_event_types                 = try(each.value.subscription.included_event_types, null)
+  labels                               = try(each.value.subscription.labels, null)
+  hybrid_connection_endpoint_id        = try(each.value.subscription.hybrid_connection_endpoint_id, null)
+  advanced_filtering_on_arrays_enabled = try(each.value.subscription.advanced_filtering_on_arrays_enabled, false)
+  expiration_time_utc                  = try(each.value.subscription.expiration_time_utc, null)
 
   service_bus_queue_endpoint_id = lookup(
     each.value.subscription, "service_bus_queue_endpoint_id",
@@ -110,7 +120,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
     for_each = lookup(each.value.subscription, "azure_function_endpoint", null) != null ? { "default" = each.value.subscription.azure_function_endpoint } : {}
 
     content {
-      function_id = azure_function_endpoint.value.function_id
+      function_id                       = azure_function_endpoint.value.function_id
+      max_events_per_batch              = try(azure_function_endpoint.value.max_events_per_batch, null)
+      preferred_batch_size_in_kilobytes = try(azure_function_endpoint.value.preferred_batch_size_in_kilobytes, null)
     }
   }
 
@@ -118,7 +130,11 @@ resource "azurerm_eventgrid_event_subscription" "this" {
     for_each = lookup(each.value.subscription, "webhook_endpoint", null) != null ? { "default" = each.value.subscription.webhook_endpoint } : {}
 
     content {
-      url = webhook_endpoint.value.url
+      url                               = webhook_endpoint.value.url
+      preferred_batch_size_in_kilobytes = try(webhook_endpoint.value.preferred_batch_size_in_kilobytes, null)
+      max_events_per_batch              = try(webhook_endpoint.value.max_events_per_batch, null)
+      active_directory_tenant_id        = try(webhook_endpoint.value.active_directory_tenant_id, null)
+      active_directory_app_id_or_uri    = try(webhook_endpoint.value.active_directory_app_id_or_uri, null)
     }
   }
 
@@ -135,6 +151,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
     for_each = contains(keys(each.value.subscription), "subject_filter") ? [each.value.subscription.subject_filter] : (
       contains(keys(each.value.subscription), "filters") ? [each.value.subscription.filters] : []
     )
+
     content {
       subject_begins_with = lookup(subject_filter.value, "subject_begins_with", "/")
       subject_ends_with   = lookup(subject_filter.value, "subject_ends_with", null)
@@ -158,77 +175,119 @@ resource "azurerm_eventgrid_event_subscription" "this" {
       }
 
       dynamic "number_greater_than" {
-        for_each = lookup(advanced_filter.value, "number_greater_than", {})
+        for_each = lookup(
+          advanced_filter.value, "number_greater_than", {}
+        )
+
         content {
           key   = number_greater_than.key
           value = number_greater_than.value
         }
       }
+
       dynamic "number_greater_than_or_equals" {
-        for_each = lookup(advanced_filter.value, "number_greater_than_or_equals", {})
+        for_each = lookup(
+          advanced_filter.value, "number_greater_than_or_equals", {}
+        )
+
         content {
           key   = number_greater_than_or_equals.key
           value = number_greater_than_or_equals.value
         }
       }
       dynamic "number_less_than" {
-        for_each = lookup(advanced_filter.value, "number_less_than", {})
+        for_each = lookup(
+          advanced_filter.value, "number_less_than", {}
+        )
+
         content {
           key   = number_less_than.key
           value = number_less_than.value
         }
       }
+
       dynamic "number_less_than_or_equals" {
-        for_each = lookup(advanced_filter.value, "number_less_than_or_equals", {})
+        for_each = lookup(
+          advanced_filter.value, "number_less_than_or_equals", {}
+        )
+
         content {
           key   = number_less_than_or_equals.key
           value = number_less_than_or_equals.value
         }
       }
+
       dynamic "number_in" {
-        for_each = lookup(advanced_filter.value, "number_in", {})
+        for_each = lookup(
+          advanced_filter.value, "number_in", {}
+        )
+
         content {
           key    = number_in.key
           values = number_in.value
         }
       }
+
       dynamic "number_not_in" {
-        for_each = lookup(advanced_filter.value, "number_not_in", {})
+        for_each = lookup(
+          advanced_filter.value, "number_not_in", {}
+        )
+
         content {
           key    = number_not_in.key
           values = number_not_in.value
         }
       }
+
       dynamic "string_begins_with" {
-        for_each = lookup(advanced_filter.value, "string_begins_with", {})
+        for_each = lookup(
+          advanced_filter.value, "string_begins_with", {}
+        )
+
         content {
           key    = string_begins_with.key
           values = string_begins_with.value
         }
       }
+
       dynamic "string_ends_with" {
-        for_each = lookup(advanced_filter.value, "string_ends_with", {})
+        for_each = lookup(
+          advanced_filter.value, "string_ends_with", {}
+        )
+
         content {
           key    = string_ends_with.key
           values = string_ends_with.value
         }
       }
+
       dynamic "string_contains" {
-        for_each = lookup(advanced_filter.value, "string_contains", {})
+        for_each = lookup(
+          advanced_filter.value, "string_contains", {}
+        )
+
         content {
           key    = string_contains.key
           values = string_contains.value
         }
       }
+
       dynamic "string_in" {
-        for_each = lookup(advanced_filter.value, "string_in", {})
+        for_each = lookup(
+          advanced_filter.value, "string_in", {}
+        )
+
         content {
           key    = string_in.key
           values = string_in.value
         }
       }
+
       dynamic "string_not_in" {
-        for_each = lookup(advanced_filter.value, "string_not_in", {})
+        for_each = lookup(
+          advanced_filter.value, "string_not_in", {}
+        )
+
         content {
           key    = string_not_in.key
           values = string_not_in.value
@@ -238,7 +297,10 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "delivery_property" {
-    for_each = lookup(each.value.subscription, "delivery_property_mappings", {})
+    for_each = lookup(
+      each.value.subscription, "delivery_property_mappings", {}
+    )
+
     content {
       header_name  = delivery_property.value.header_name
       type         = delivery_property.value.type
@@ -260,7 +322,10 @@ resource "azurerm_eventgrid_system_topic" "this" {
   location               = coalesce(lookup(var.config, "location", null), var.location)
   source_arm_resource_id = each.value.source_arm_resource_id
   topic_type             = each.value.topic_type
-  tags                   = try(var.config.tags, var.tags, null)
+
+  tags = try(
+    var.config.tags, var.tags, null
+  )
 }
 
 # system topic event subscriptions
@@ -291,17 +356,61 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   system_topic        = each.value.topic_name
   resource_group_name = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
 
-  event_delivery_schema         = each.value.event_delivery_schema
-  included_event_types          = each.value.included_event_types
-  service_bus_queue_endpoint_id = each.value.service_bus_queue_endpoint_id
-  service_bus_topic_endpoint_id = each.value.service_bus_topic_endpoint_id
-  eventhub_endpoint_id          = each.value.eventhub_endpoint_id
+  event_delivery_schema                = each.value.event_delivery_schema
+  included_event_types                 = each.value.included_event_types
+  service_bus_queue_endpoint_id        = each.value.service_bus_queue_endpoint_id
+  service_bus_topic_endpoint_id        = each.value.service_bus_topic_endpoint_id
+  eventhub_endpoint_id                 = each.value.eventhub_endpoint_id
+  labels                               = try(each.value.labels, [])
+  expiration_time_utc                  = try(each.value.expiration_time_utc, null)
+  advanced_filtering_on_arrays_enabled = try(each.value.advanced_filtering_on_arrays_enabled, false)
+  hybrid_connection_endpoint_id        = try(each.value.hybrid_connection_endpoint_id, null)
+
+
+  dynamic "storage_blob_dead_letter_destination" {
+    for_each = lookup(each.value, "storage_blob_dead_letter_destination", null) != null ? { "default" = each.value.storage_blob_dead_letter_destination } : {}
+
+    content {
+      storage_account_id          = storage_blob_dead_letter_destination.value.storage_account_id
+      storage_blob_container_name = storage_blob_dead_letter_destination.value.storage_blob_container_name
+    }
+  }
+
+  dynamic "storage_queue_endpoint" {
+    for_each = lookup(each.value, "storage_queue_endpoint", null) != null ? { "default" = each.value.storage_queue_endpoint } : {}
+
+    content {
+      storage_account_id                    = storage_queue_endpoint.value.storage_account_id
+      queue_name                            = storage_queue_endpoint.value.queue_name
+      queue_message_time_to_live_in_seconds = try(storage_queue_endpoint.value.queue_message_time_to_live_in_seconds, null)
+    }
+  }
+
+  dynamic "delivery_identity" {
+    for_each = lookup(each.value, "delivery_identity", null) != null ? { "default" = each.value.delivery_identity } : {}
+
+    content {
+      type                   = delivery_identity.value.type
+      user_assigned_identity = try(delivery_identity.value.user_assigned_identity, null)
+    }
+  }
+
+  dynamic "dead_letter_identity" {
+    for_each = lookup(each.value, "dead_letter_identity", null) != null ? { "default" = each.value.dead_letter_identity } : {}
+
+    content {
+      type                   = dead_letter_identity.value.type
+      user_assigned_identity = try(dead_letter_identity.value.user_assigned_identity, null)
+    }
+  }
 
   dynamic "azure_function_endpoint" {
     for_each = lookup(each.value, "azure_function_endpoint", null) != null ? { "default" = each.value.azure_function_endpoint } : {}
 
     content {
-      function_id = azure_function_endpoint.value.function_id
+      function_id                       = azure_function_endpoint.value.function_id
+      max_events_per_batch              = try(azure_function_endpoint.value.max_events_per_batch, null)
+      preferred_batch_size_in_kilobytes = try(azure_function_endpoint.value.preferred_batch_size_in_kilobytes, null)
     }
   }
 
@@ -309,11 +418,15 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
     for_each = lookup(each.value, "webhook_endpoint", null) != null ? { "default" = each.value.webhook_endpoint } : {}
 
     content {
-      url = webhook_endpoint.value.url
+      url                               = webhook_endpoint.value.url
+      preferred_batch_size_in_kilobytes = try(webhook_endpoint.value.preferred_batch_size_in_kilobytes, null)
+      max_events_per_batch              = try(webhook_endpoint.value.max_events_per_batch, null)
+      active_directory_app_id_or_uri    = try(webhook_endpoint.value.active_directory_app_id_or_uri, null)
+      active_directory_tenant_id        = try(webhook_endpoint.value.active_directory_tenant_id, null)
     }
   }
 
-  dynamic "subject_filter" {
+  dynamic "subject_filter" { //max 1
     for_each = lookup(each.value, "subject_filter", null) != null ? { "default" = each.value.subject_filter } : {}
 
     content {
@@ -325,6 +438,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
 
   dynamic "retry_policy" {
     for_each = lookup(each.value, "retry_policy", null) != null ? { "default" = each.value.retry_policy } : {}
+
     content {
       max_delivery_attempts = retry_policy.value.max_delivery_attempts
       event_time_to_live    = retry_policy.value.event_time_to_live
@@ -333,6 +447,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
 
   dynamic "delivery_property" {
     for_each = each.value.delivery_property_mappings != null ? each.value.delivery_property_mappings : {}
+
     content {
       header_name  = delivery_property.value.header_name
       type         = delivery_property.value.type
@@ -358,77 +473,120 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
       }
 
       dynamic "number_greater_than" {
-        for_each = lookup(advanced_filter.value, "number_greater_than", {})
+        for_each = lookup(
+          advanced_filter.value, "number_greater_than", {}
+        )
+
         content {
           key   = number_greater_than.key
           value = number_greater_than.value
         }
       }
+
       dynamic "number_greater_than_or_equals" {
-        for_each = lookup(advanced_filter.value, "number_greater_than_or_equals", {})
+        for_each = lookup(
+          advanced_filter.value, "number_greater_than_or_equals", {}
+        )
+
         content {
           key   = number_greater_than_or_equals.key
           value = number_greater_than_or_equals.value
         }
       }
+
       dynamic "number_less_than" {
-        for_each = lookup(advanced_filter.value, "number_less_than", {})
+        for_each = lookup(
+          advanced_filter.value, "number_less_than", {}
+        )
+
         content {
           key   = number_less_than.key
           value = number_less_than.value
         }
       }
+
       dynamic "number_less_than_or_equals" {
-        for_each = lookup(advanced_filter.value, "number_less_than_or_equals", {})
+        for_each = lookup(
+          advanced_filter.value, "number_less_than_or_equals", {}
+        )
+
         content {
           key   = number_less_than_or_equals.key
           value = number_less_than_or_equals.value
         }
       }
+
       dynamic "number_in" {
-        for_each = lookup(advanced_filter.value, "number_in", {})
+        for_each = lookup(
+          advanced_filter.value, "number_in", {}
+        )
+
         content {
           key    = number_in.key
           values = number_in.value
         }
       }
+
       dynamic "number_not_in" {
-        for_each = lookup(advanced_filter.value, "number_not_in", {})
+        for_each = lookup(
+          advanced_filter.value, "number_not_in", {}
+        )
+
         content {
           key    = number_not_in.key
           values = number_not_in.value
         }
       }
+
       dynamic "string_begins_with" {
-        for_each = lookup(advanced_filter.value, "string_begins_with", {})
+        for_each = lookup(
+          advanced_filter.value, "string_begins_with", {}
+        )
+
         content {
           key    = string_begins_with.key
           values = string_begins_with.value
         }
       }
+
       dynamic "string_ends_with" {
-        for_each = lookup(advanced_filter.value, "string_ends_with", {})
+        for_each = lookup(
+          advanced_filter.value, "string_ends_with", {}
+        )
+
         content {
           key    = string_ends_with.key
           values = string_ends_with.value
         }
       }
+
       dynamic "string_contains" {
-        for_each = lookup(advanced_filter.value, "string_contains", {})
+        for_each = lookup(
+          advanced_filter.value, "string_contains", {}
+        )
+
         content {
           key    = string_contains.key
           values = string_contains.value
         }
       }
+
       dynamic "string_in" {
-        for_each = lookup(advanced_filter.value, "string_in", {})
+        for_each = lookup(
+          advanced_filter.value, "string_in", {}
+        )
+
         content {
           key    = string_in.key
           values = string_in.value
         }
       }
+
       dynamic "string_not_in" {
-        for_each = lookup(advanced_filter.value, "string_not_in", {})
+        for_each = lookup(
+          advanced_filter.value, "string_not_in", {}
+        )
+
         content {
           key    = string_not_in.key
           values = string_not_in.value
