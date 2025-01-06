@@ -48,7 +48,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             domain_key   = domain_key
             topic_key    = topic_key
             subscription = sub
-            name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key]))
+            name = try(
+              sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key])
+            )
           }
         ]
       ]
@@ -67,7 +69,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             id           = "${topic_key}-${sub_key}"
             topic_key    = topic_key
             subscription = sub
-            name         = try(sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key]))
+            name = try(
+              sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key])
+            )
           }
         ]
         ]) : item.id => {
