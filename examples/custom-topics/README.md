@@ -6,7 +6,6 @@ This deploys topics and event subscriptions that fits more specific, custom use 
 
 ```hcl
 config = object({
-  name           = string
   resource_group = string
   location       = string
   custom_topics = optional(map(object({
