@@ -608,8 +608,8 @@ resource "azurerm_eventgrid_topic" "this" {
 
   resource_group_name           = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
   location                      = coalesce(lookup(var.config, "location", null), var.location)
-  input_schema                  = each.value.input_schema
-  public_network_access_enabled = each.value.public_network_access_enabled
+  input_schema                  = try(each.value.input_schema, "EventGridSchema")
+  public_network_access_enabled = try(each.value.public_network_access_enabled, true)
   local_auth_enabled            = try(each.value.local_auth_enabled, false)
   tags                          = try(var.config.tags, var.tags, null)
   inbound_ip_rule               = try(each.value.inbound_ip_rule, null)

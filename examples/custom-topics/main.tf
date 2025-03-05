@@ -56,7 +56,6 @@ module "eventgrid" {
   naming = local.naming
 
   config = {
-    name           = module.naming.eventgrid_domain.name
     resource_group = module.rg.groups.demo.name
     location       = module.rg.groups.demo.location
 
