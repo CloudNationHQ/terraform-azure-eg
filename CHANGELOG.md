@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v1.4.1...v1.4.2) (2025-03-07)
+
+
+### Bug Fixes
+
+* fix included event types to be optional in system topics ([#20](https://github.com/CloudNationHQ/terraform-azure-eg/issues/20)) ([199a109](https://github.com/CloudNationHQ/terraform-azure-eg/commit/199a10964bde8510b6a99e8f0a98e7c177036149))
+
 ## [1.4.1](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v1.4.0...v1.4.1) (2025-03-07)
 
 
