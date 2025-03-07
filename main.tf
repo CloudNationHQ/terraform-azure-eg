@@ -341,7 +341,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
           topic_key                     = topic_key
           name                          = sub_key
           topic_name                    = azurerm_eventgrid_system_topic.this[topic_key].name
-          included_event_types          = sub.included_event_types
+          included_event_types          = try(sub.included_event_types, [])
           event_delivery_schema         = try(sub.event_delivery_schema, null)
           webhook_endpoint              = try(sub.webhook_endpoint, null)
           service_bus_queue_endpoint_id = try(sub.service_bus_queue_endpoint_id, null)
