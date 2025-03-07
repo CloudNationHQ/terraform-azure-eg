@@ -317,7 +317,10 @@ resource "azurerm_eventgrid_system_topic" "this" {
     var.config, "system_topics", {}
   )
 
-  name                   = "${var.config.name}-${each.key}"
+  name = try(
+    each.value.name, join("-", [var.naming.eventgrid_topic, each.key])
+  )
+
   resource_group_name    = coalesce(lookup(var.config, "resource_group", null), var.resource_group)
   location               = coalesce(lookup(var.config, "location", null), var.location)
   source_arm_resource_id = each.value.source_arm_resource_id

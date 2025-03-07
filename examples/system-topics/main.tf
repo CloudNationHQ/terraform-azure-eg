@@ -71,6 +71,8 @@ module "eventgrid" {
   source  = "cloudnationhq/eg/azure"
   version = "~> 1.0"
 
+  naming = local.naming
+
   config = {
     name           = module.naming.eventgrid_domain.name
     resource_group = module.rg.groups.demo.name

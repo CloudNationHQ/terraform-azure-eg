@@ -4,5 +4,5 @@ locals {
     for type in local.naming_types : type => lookup(module.naming, type).name
   }
 
-  naming_types = ["servicebus_queue", "servicebus_queue_authorization_rule", "servicebus_topic", "servicebus_subscription", "storage_container"]
+  naming_types = ["servicebus_queue", "servicebus_queue_authorization_rule", "servicebus_topic", "servicebus_subscription", "storage_container", "eventgrid_topic"]
 }
