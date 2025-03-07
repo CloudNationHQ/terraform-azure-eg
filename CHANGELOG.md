@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v1.4.0...v1.4.1) (2025-03-07)
+
+
+### Bug Fixes
+
+* fix event grid system topic naming ([#18](https://github.com/CloudNationHQ/terraform-azure-eg/issues/18)) ([034e694](https://github.com/CloudNationHQ/terraform-azure-eg/commit/034e694f94cd64e7bf18cb1abb7a57be6a911a5f))
+
 ## [1.4.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v1.3.0...v1.4.0) (2025-03-05)
 
 
