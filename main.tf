@@ -174,6 +174,26 @@ resource "azurerm_eventgrid_event_subscription" "this" {
         }
       }
 
+      dynamic "is_not_null" {
+        for_each = lookup(
+          advanced_filter.value, "is_not_null", {}
+        )
+
+        content {
+          key = try(is_not_null.value, null)
+        }
+      }
+
+      dynamic "is_null_or_undefined" {
+        for_each = lookup(
+          advanced_filter.value, "is_null_or_undefined", {}
+        )
+
+        content {
+          key = is_null_or_undefined.value
+        }
+      }
+
       dynamic "number_greater_than" {
         for_each = lookup(
           advanced_filter.value, "number_greater_than", {}
@@ -280,6 +300,17 @@ resource "azurerm_eventgrid_event_subscription" "this" {
         content {
           key    = string_in.key
           values = string_in.value
+        }
+      }
+
+      dynamic "string_not_ends_with" {
+        for_each = lookup(
+          advanced_filter.value, "string_not_ends_with", {}
+        )
+
+        content {
+          key    = string_not_ends_with.key
+          values = string_not_ends_with.value
         }
       }
 
@@ -475,6 +506,26 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
         }
       }
 
+      dynamic "is_not_null" {
+        for_each = lookup(
+          advanced_filter.value, "is_not_null", {}
+        )
+
+        content {
+          key = try(is_not_null.value, null)
+        }
+      }
+
+      dynamic "is_null_or_undefined" {
+        for_each = lookup(
+          advanced_filter.value, "is_null_or_undefined", {}
+        )
+
+        content {
+          key = is_null_or_undefined.value
+        }
+      }
+
       dynamic "number_greater_than" {
         for_each = lookup(
           advanced_filter.value, "number_greater_than", {}
@@ -582,6 +633,17 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
         content {
           key    = string_in.key
           values = string_in.value
+        }
+      }
+
+      dynamic "string_not_ends_with" {
+        for_each = lookup(
+          advanced_filter.value, "string_not_ends_with", {}
+        )
+
+        content {
+          key    = string_not_ends_with.key
+          values = string_not_ends_with.value
         }
       }
 
