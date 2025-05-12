@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v1.5.0...v2.0.0) (2025-05-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* The data structure changed, causing a recreate on existing resources.
+
+### Features
+
+* small refactor ([#28](https://github.com/CloudNationHQ/terraform-azure-eg/issues/28)) ([cc28500](https://github.com/CloudNationHQ/terraform-azure-eg/commit/cc285008cbb452ef7ee06132ab66e4b225b8384c))
+
 ## [1.5.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v1.4.2...v1.5.0) (2025-04-22)
 
 
