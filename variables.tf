@@ -303,12 +303,12 @@ variable "config" {
     })), {})
   })
   validation {
-    condition     = var.instance.location != null || var.location != null
+    condition     = var.config.location != null || var.location != null
     error_message = "location must be provided either in the config object or as a separate variable."
   }
 
   validation {
-    condition     = var.instance.resource_group_name != null || var.resource_group_name != null
+    condition     = var.config.resource_group_name != null || var.resource_group_name != null
     error_message = "resource group name must be provided either in the config object or as a separate variable."
   }
 }

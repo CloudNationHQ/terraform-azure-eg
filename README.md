@@ -424,6 +424,10 @@ Description: contains system topic event subscriptions configuration
 Description: contains system topics configuration
 <!-- END_TF_DOCS -->
 
+## Goals
+
+For more information, please see our [goals and non-goals](./GOALS.md).
+
 ## Testing
 
 For more information, please see our testing [guidelines](./TESTING.md)
@@ -436,15 +440,15 @@ Full examples detailing all usages, along with integrations with dependency modu
 
 To update the module's documentation run `make doc`
 
-## Authors
-
-Module is maintained by [these awesome contributors](https://github.com/cloudnationhq/terraform-azure-eg/graphs/contributors).
-
-## Contributing
+## Contributors
 
 We welcome contributions from the community! Whether it's reporting a bug, suggesting a new feature, or submitting a pull request, your input is highly valued.
 
-For more information, please see our contribution [guidelines](./CONTRIBUTING.md).
+For more information, please see our contribution [guidelines](./CONTRIBUTING.md). <br><br>
+
+<a href="https://github.com/cloudnationhq/terraform-azure-eg/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cloudnationhq/terraform-azure-eg" />
+</a>
 
 ## License
 
