@@ -1,6 +1,6 @@
 module "naming" {
   source  = "cloudnationhq/naming/azure"
-  version = "~> 0.1"
+  version = "~> 0.24"
 
   suffix = ["demo", "dev"]
 }
@@ -19,14 +19,14 @@ module "rg" {
 
 module "servicebus" {
   source  = "cloudnationhq/sb/azure"
-  version = "~> 1.0"
+  version = "~> 2.0"
 
   naming = local.naming
 
   config = {
-    name           = module.naming.servicebus_namespace.name_unique
-    resource_group = module.rg.groups.demo.name
-    location       = module.rg.groups.demo.location
+    name                = module.naming.servicebus_namespace.name_unique
+    resource_group_name = module.rg.groups.demo.name
+    location            = module.rg.groups.demo.location
 
     topics = {
       notifications = {
@@ -51,13 +51,13 @@ module "servicebus" {
 
 module "eventgrid" {
   source  = "cloudnationhq/eg/azure"
-  version = "~> 1.0"
+  version = "~> 2.0"
 
   naming = local.naming
 
   config = {
-    resource_group = module.rg.groups.demo.name
-    location       = module.rg.groups.demo.location
+    resource_group_name = module.rg.groups.demo.name
+    location            = module.rg.groups.demo.location
 
     custom_topics = {
       notifications = {
