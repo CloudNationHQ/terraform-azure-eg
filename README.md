@@ -59,6 +59,32 @@ object({
     resource_group_name = optional(string, null)
     location            = optional(string, null)
     tags                = optional(map(string))
+    inbound_ip_rule = optional(list(object({
+      ip_mask = string
+      action  = optional(string, "Allow")
+    })), null)
+    input_schema                              = optional(string, "EventGridSchema")
+    public_network_access_enabled             = optional(bool, true)
+    auto_delete_topic_with_last_subscription  = optional(bool, false)
+    local_auth_enabled                        = optional(bool, false)
+    auto_create_topic_with_first_subscription = optional(bool, false)
+    input_mappings_default_values = optional(object({
+      data_version = optional(string, null)
+      event_type   = optional(string, null)
+      subject      = optional(string, null)
+    }), null)
+    input_mappings_fields = optional(object({
+      id           = optional(string, null)
+      topic        = optional(string, null)
+      subject      = optional(string, null)
+      event_time   = optional(string, null)
+      event_type   = optional(string, null)
+      data_version = optional(string, null)
+    }), null)
+    identity = optional(object({
+      type                   = string
+      user_assigned_identity = optional(string, null)
+    }), null)
     domains = optional(map(object({
       name = optional(string, null)
       domain_topics = optional(map(object({
@@ -118,6 +144,10 @@ object({
             string_in                     = optional(map(list(string)), {})
             string_not_ends_with          = optional(map(list(string)), {})
             string_not_in                 = optional(map(list(string)), {})
+            string_not_contains           = optional(map(list(string)), {})
+            string_not_begins_with        = optional(map(list(string)), {})
+            number_in_range               = optional(map(list(number)), {})
+            number_not_in_range           = optional(map(list(number)), {})
           }), null)
           delivery_property_mappings = optional(map(object({
             header_name  = string
@@ -135,6 +165,10 @@ object({
       public_network_access_enabled = optional(bool, true)
       local_auth_enabled            = optional(bool, false)
       inbound_ip_rule               = optional(any, null)
+      identity = optional(object({
+        type                   = string
+        user_assigned_identity = optional(string, null)
+      }), null)
       input_mapping_fields = optional(object({
         id           = optional(string, null)
         topic        = optional(string, null)
@@ -195,14 +229,18 @@ object({
           number_greater_than_or_equals = optional(map(number), {})
           number_less_than              = optional(map(number), {})
           number_less_than_or_equals    = optional(map(number), {})
-          number_in                     = optional(map(list(number)), {})
-          number_not_in                 = optional(map(list(number)), {})
+          number_in_range               = optional(map(list(number)), {})
+          number_not_in_range           = optional(map(list(number)), {})
           string_begins_with            = optional(map(list(string)), {})
+          string_not_begins_with        = optional(map(list(string)), {})
           string_ends_with              = optional(map(list(string)), {})
           string_contains               = optional(map(list(string)), {})
+          string_not_contains           = optional(map(list(string)), {})
           string_in                     = optional(map(list(string)), {})
           string_not_ends_with          = optional(map(list(string)), {})
           string_not_in                 = optional(map(list(string)), {})
+          number_in                     = optional(map(list(number)), {})
+          number_not_in                 = optional(map(list(number)), {})
         }), null)
         delivery_property_mappings = optional(map(object({
           header_name  = string
@@ -227,6 +265,10 @@ object({
         expiration_time_utc                  = optional(string, null)
         advanced_filtering_on_arrays_enabled = optional(bool, false)
         hybrid_connection_endpoint_id        = optional(string, null)
+        identity = optional(object({
+          type                   = string
+          user_assigned_identity = optional(string, null)
+        }), null)
         storage_blob_dead_letter_destination = optional(object({
           storage_account_id          = string
           storage_blob_container_name = string
@@ -288,6 +330,10 @@ object({
           string_in                     = optional(map(list(string)), {})
           string_not_ends_with          = optional(map(list(string)), {})
           string_not_in                 = optional(map(list(string)), {})
+          string_not_contains           = optional(map(list(string)), {})
+          string_not_begins_with        = optional(map(list(string)), {})
+          number_in_range               = optional(map(list(number)), {})
+          number_not_in_range           = optional(map(list(number)), {})
         }), null)
       })), {})
     })), {})
@@ -305,6 +351,23 @@ object({
       eventhub_endpoint_id                 = optional(string, null)
       endpoint_type                        = optional(string, null)
       endpoint_id                          = optional(string, null)
+      dead_letter_identity = optional(object({
+        type                   = string
+        user_assigned_identity = optional(string, null)
+      }), null)
+      storage_blob_dead_letter_destination = optional(object({
+        storage_account_id          = string
+        storage_blob_container_name = string
+      }), null)
+      storage_queue_endpoint = optional(object({
+        storage_account_id                    = string
+        queue_name                            = string
+        queue_message_time_to_live_in_seconds = optional(number, null)
+      }), null)
+      delivery_identity = optional(object({
+        type                   = string
+        user_assigned_identity = optional(string, null)
+      }), null)
       azure_function_endpoint = optional(object({
         function_id                       = string
         max_events_per_batch              = optional(number, null)
@@ -347,6 +410,10 @@ object({
         string_in                     = optional(map(list(string)), {})
         string_not_ends_with          = optional(map(list(string)), {})
         string_not_in                 = optional(map(list(string)), {})
+        string_not_contains           = optional(map(list(string)), {})
+        string_not_begins_with        = optional(map(list(string)), {})
+        number_in_range               = optional(map(list(number)), {})
+        number_not_in_range           = optional(map(list(number)), {})
       }), null)
       delivery_property_mappings = optional(map(object({
         header_name  = string
