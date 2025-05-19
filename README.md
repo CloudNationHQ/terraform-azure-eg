@@ -18,6 +18,8 @@ Allows custom retry policies and event time to live settings.
 
 Facilitates event routing through header mappings
 
+Offers three-tier naming hierarchy (explicit, convention-based, or key-based) for flexible resource management.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
