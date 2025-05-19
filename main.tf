@@ -75,9 +75,8 @@ resource "azurerm_eventgrid_domain_topic" "this" {
         domain_key  = domain_key
         name = coalesce(
           topic.name, try(
-            join("-", [var.naming.eventgrid_domain_topic, topic_key]
-            ), null, topic_key
-          )
+            join("-", [var.naming.eventgrid_domain_topic, topic_key]), null
+          ), topic_key
         )
       }
     }
@@ -107,9 +106,8 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             subscription = sub
             name = coalesce(
               sub.name, try(
-                join("-", [var.naming.eventgrid_event_subscription, sub_key]
-                ), null, sub_key
-              )
+                join("-", [var.naming.eventgrid_event_subscription, sub_key]), null
+              ), sub_key
             )
           }
         ]
@@ -131,8 +129,8 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             subscription = sub
             name = coalesce(
               sub.name, try(
-                join("-", [var.naming.eventgrid_event_subscription, sub_key])
-              ), null, sub_key
+                join("-", [var.naming.eventgrid_event_subscription, sub_key]), null
+              ), sub_key
             )
           }
         ]
@@ -150,8 +148,8 @@ resource "azurerm_eventgrid_event_subscription" "this" {
         subscription = sub
         name = coalesce(
           sub.name, try(
-            join("-", [var.naming.eventgrid_event_subscription, key])
-          ), null, key
+            join("-", [var.naming.eventgrid_event_subscription, key]), null
+          ), key
         )
       }
     }
@@ -459,9 +457,10 @@ resource "azurerm_eventgrid_system_topic" "this" {
   )
 
   name = coalesce(
-    each.value.name, try(
-      join("-", [var.naming.eventgrid_topic, each.key])
-    ), null, each.key
+    each.value.name,
+    try(
+      join("-", [var.naming.eventgrid_topic, each.key]), null
+    ), each.key
   )
 
   resource_group_name = coalesce(
@@ -824,8 +823,8 @@ resource "azurerm_eventgrid_topic" "this" {
 
   name = coalesce(
     each.value.name, try(
-      join("-", [var.naming.eventgrid_topic, each.key])
-    ), null, each.key
+      join("-", [var.naming.eventgrid_topic, each.key]), null
+    ), each.key
   )
 
   input_schema                  = each.value.input_schema
