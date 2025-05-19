@@ -16,7 +16,9 @@ resource "azurerm_eventgrid_domain" "this" {
   )
 
   name = coalesce(
-    each.value.name, join("-", [var.naming.eventgrid_domain, each.key])
+    each.value.name, try(
+      join("-", [var.naming.eventgrid_domain, each.key]), null
+    ), each.key
   )
 
   dynamic "input_mapping_default_values" {
@@ -72,7 +74,9 @@ resource "azurerm_eventgrid_domain_topic" "this" {
         domain_name = azurerm_eventgrid_domain.this[domain_key].name
         domain_key  = domain_key
         name = coalesce(
-          topic.name, join("-", [var.naming.eventgrid_domain_topic, topic_key])
+          topic.name, try(
+            join("-", [var.naming.eventgrid_domain_topic, topic_key]), null
+          ), topic_key
         )
       }
     }
@@ -101,7 +105,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             topic_key    = topic_key
             subscription = sub
             name = coalesce(
-              sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key])
+              sub.name, try(
+                join("-", [var.naming.eventgrid_event_subscription, sub_key]), null
+              ), sub_key
             )
           }
         ]
@@ -122,7 +128,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
             topic_key    = topic_key
             subscription = sub
             name = coalesce(
-              sub.name, join("-", [var.naming.eventgrid_event_subscription, sub_key])
+              sub.name, try(
+                join("-", [var.naming.eventgrid_event_subscription, sub_key]), null
+              ), sub_key
             )
           }
         ]
@@ -139,7 +147,9 @@ resource "azurerm_eventgrid_event_subscription" "this" {
         scope        = sub.scope
         subscription = sub
         name = coalesce(
-          sub.name, join("-", [var.naming.eventgrid_event_subscription, key])
+          sub.name, try(
+            join("-", [var.naming.eventgrid_event_subscription, key]), null
+          ), key
         )
       }
     }
@@ -447,7 +457,10 @@ resource "azurerm_eventgrid_system_topic" "this" {
   )
 
   name = coalesce(
-    each.value.name, join("-", [var.naming.eventgrid_topic, each.key])
+    each.value.name,
+    try(
+      join("-", [var.naming.eventgrid_topic, each.key]), null
+    ), each.key
   )
 
   resource_group_name = coalesce(
@@ -809,7 +822,9 @@ resource "azurerm_eventgrid_topic" "this" {
   )
 
   name = coalesce(
-    each.value.name, join("-", [var.naming.eventgrid_topic, each.key])
+    each.value.name, try(
+      join("-", [var.naming.eventgrid_topic, each.key]), null
+    ), each.key
   )
 
   input_schema                  = each.value.input_schema
