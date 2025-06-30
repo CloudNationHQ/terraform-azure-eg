@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.2.0...v2.2.1) (2025-06-30)
+
+
+### Bug Fixes
+
+* add missing properties, including azure_function_endpoint ([#35](https://github.com/CloudNationHQ/terraform-azure-eg/issues/35)) ([d821a40](https://github.com/CloudNationHQ/terraform-azure-eg/commit/d821a4099637939840a017c4edb670e5c7df2c13))
+
 ## [2.2.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.1.0...v2.2.0) (2025-05-19)
 
 
