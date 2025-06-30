@@ -210,6 +210,13 @@ variable "config" {
         expiration_time_utc                  = optional(string, null)
         advanced_filtering_on_arrays_enabled = optional(bool, false)
         hybrid_connection_endpoint_id        = optional(string, null)
+        delivery_property = optional(map(object({
+          header_name  = string
+          type         = string
+          value        = optional(string, null)
+          source_field = optional(string, null)
+          secret       = optional(string, null)
+        })), {})
         identity = optional(object({
           type                   = string
           user_assigned_identity = optional(string, null)
