@@ -514,6 +514,13 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
           expiration_time_utc                  = sub.expiration_time_utc
           advanced_filtering_on_arrays_enabled = sub.advanced_filtering_on_arrays_enabled
           hybrid_connection_endpoint_id        = sub.hybrid_connection_endpoint_id
+          azure_function_endpoint              = sub.azure_function_endpoint
+          delivery_identity                    = sub.delivery_identity
+          dead_letter_identity                 = sub.dead_letter_identity
+          storage_blob_dead_letter_destination = sub.storage_blob_dead_letter_destination
+          storage_queue_endpoint               = sub.storage_queue_endpoint
+          delivery_property                    = sub.delivery_property
+          advanced_filter                      = sub.advanced_filter
         }
       ]
     ]) : item.id => item
