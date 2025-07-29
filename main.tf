@@ -482,7 +482,7 @@ resource "azurerm_eventgrid_system_topic" "this" {
   )
 
   dynamic "identity" {
-    for_each = lookup(each.value, "identity", null) != null ? [var.config.identity] : []
+    for_each = lookup(each.value, "identity", null) != null ? [each.value.identity] : []
 
     content {
       type         = identity.value.type
@@ -523,7 +523,6 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
           dead_letter_identity                 = sub.dead_letter_identity
           storage_blob_dead_letter_destination = sub.storage_blob_dead_letter_destination
           storage_queue_endpoint               = sub.storage_queue_endpoint
-          delivery_property                    = sub.delivery_property
           advanced_filter                      = sub.advanced_filter
         }
       ]
@@ -693,7 +692,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
         for_each = advanced_filter.value.is_not_null
 
         content {
-          key = try(is_not_null.value, null)
+          key = is_not_null.value
         }
       }
 
@@ -849,7 +848,7 @@ resource "azurerm_eventgrid_topic" "this" {
   )
 
   dynamic "identity" {
-    for_each = lookup(each.value, "identity", null) != null ? [var.config.identity] : []
+    for_each = lookup(each.value, "identity", null) != null ? [each.value.identity] : []
 
     content {
       type         = identity.value.type
