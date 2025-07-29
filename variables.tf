@@ -239,6 +239,7 @@ variable "config" {
         identity_ids = optional(list(string), null)
       }), null)
       event_subscriptions = optional(map(object({
+        name                                 = optional(string)
         included_event_types                 = optional(list(string), [])
         event_delivery_schema                = optional(string, null)
         service_bus_queue_endpoint_id        = optional(string, null)
