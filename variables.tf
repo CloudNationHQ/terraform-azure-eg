@@ -13,25 +13,25 @@ variable "config" {
     auto_delete_topic_with_last_subscription  = optional(bool, false)
     local_auth_enabled                        = optional(bool, false)
     auto_create_topic_with_first_subscription = optional(bool, false)
-    input_mappings_default_values = optional(object({
-      data_version = optional(string, null)
-      event_type   = optional(string, null)
-      subject      = optional(string, null)
-    }), null)
-    input_mappings_fields = optional(object({
-      id           = optional(string, null)
-      topic        = optional(string, null)
-      subject      = optional(string, null)
-      event_time   = optional(string, null)
-      event_type   = optional(string, null)
-      data_version = optional(string, null)
-    }), null)
     identity = optional(object({
-      type                   = string
-      user_assigned_identity = optional(string, null)
+      type         = string
+      identity_ids = optional(list(string), null)
     }), null)
     domains = optional(map(object({
       name = optional(string, null)
+      input_mapping_default_values = optional(object({
+        data_version = optional(string, null)
+        event_type   = optional(string, null)
+        subject      = optional(string, null)
+      }), null)
+      input_mapping_fields = optional(object({
+        id           = optional(string, null)
+        topic        = optional(string, null)
+        subject      = optional(string, null)
+        event_time   = optional(string, null)
+        event_type   = optional(string, null)
+        data_version = optional(string, null)
+      }), null)
       domain_topics = optional(map(object({
         name = optional(string, null)
         event_subscriptions = optional(map(object({
@@ -75,8 +75,8 @@ variable "config" {
           }), null)
           advanced_filter = optional(object({
             bool_equals                   = optional(map(bool), {})
-            is_not_null                   = optional(map(string), {})
-            is_null_or_undefined          = optional(map(string), {})
+            is_not_null                   = optional(list(string), [])
+            is_null_or_undefined          = optional(list(string), [])
             number_greater_than           = optional(map(number), {})
             number_greater_than_or_equals = optional(map(number), {})
             number_less_than              = optional(map(number), {})
@@ -101,6 +101,23 @@ variable "config" {
             source_field = optional(string, null)
             secret       = optional(string, null)
           })), {})
+          dead_letter_identity = optional(object({
+            type                   = string
+            user_assigned_identity = optional(string, null)
+          }), null)
+          delivery_identity = optional(object({
+            type                   = string
+            user_assigned_identity = optional(string, null)
+          }), null)
+          storage_blob_dead_letter_destination = optional(object({
+            storage_account_id          = string
+            storage_blob_container_name = string
+          }), null)
+          storage_queue_endpoint = optional(object({
+            storage_account_id                    = string
+            queue_name                            = string
+            queue_message_time_to_live_in_seconds = optional(number, null)
+          }), null)
         })), {})
       })), {})
     })), {})
@@ -111,8 +128,8 @@ variable "config" {
       local_auth_enabled            = optional(bool, false)
       inbound_ip_rule               = optional(any, null)
       identity = optional(object({
-        type                   = string
-        user_assigned_identity = optional(string, null)
+        type         = string
+        identity_ids = optional(list(string), null)
       }), null)
       input_mapping_fields = optional(object({
         id           = optional(string, null)
@@ -168,8 +185,8 @@ variable "config" {
         }), null)
         advanced_filter = optional(object({
           bool_equals                   = optional(map(bool), {})
-          is_not_null                   = optional(map(string), {})
-          is_null_or_undefined          = optional(map(string), {})
+          is_not_null                   = optional(list(string), [])
+          is_null_or_undefined          = optional(list(string), [])
           number_greater_than           = optional(map(number), {})
           number_greater_than_or_equals = optional(map(number), {})
           number_less_than              = optional(map(number), {})
@@ -194,12 +211,33 @@ variable "config" {
           source_field = optional(string, null)
           secret       = optional(string, null)
         })), {})
+        dead_letter_identity = optional(object({
+          type                   = string
+          user_assigned_identity = optional(string, null)
+        }), null)
+        delivery_identity = optional(object({
+          type                   = string
+          user_assigned_identity = optional(string, null)
+        }), null)
+        storage_blob_dead_letter_destination = optional(object({
+          storage_account_id          = string
+          storage_blob_container_name = string
+        }), null)
+        storage_queue_endpoint = optional(object({
+          storage_account_id                    = string
+          queue_name                            = string
+          queue_message_time_to_live_in_seconds = optional(number, null)
+        }), null)
       })), {})
     })), {})
     system_topics = optional(map(object({
       name                   = optional(string, null)
       source_arm_resource_id = string
       topic_type             = string
+      identity = optional(object({
+        type         = string
+        identity_ids = optional(list(string), null)
+      }), null)
       event_subscriptions = optional(map(object({
         included_event_types                 = optional(list(string), [])
         event_delivery_schema                = optional(string, null)
@@ -210,7 +248,7 @@ variable "config" {
         expiration_time_utc                  = optional(string, null)
         advanced_filtering_on_arrays_enabled = optional(bool, false)
         hybrid_connection_endpoint_id        = optional(string, null)
-        delivery_property = optional(map(object({
+        delivery_property_mappings = optional(map(object({
           header_name  = string
           type         = string
           value        = optional(string, null)
@@ -218,8 +256,8 @@ variable "config" {
           secret       = optional(string, null)
         })), {})
         identity = optional(object({
-          type                   = string
-          user_assigned_identity = optional(string, null)
+          type         = string
+          identity_ids = optional(list(string), null)
         }), null)
         storage_blob_dead_letter_destination = optional(object({
           storage_account_id          = string
@@ -259,17 +297,10 @@ variable "config" {
           max_delivery_attempts = number
           event_time_to_live    = number
         }), null)
-        delivery_property_mappings = optional(map(object({
-          header_name  = string
-          type         = string
-          value        = optional(string, null)
-          source_field = optional(string, null)
-          secret       = optional(string, null)
-        })), null)
         advanced_filter = optional(object({
           bool_equals                   = optional(map(bool), {})
-          is_not_null                   = optional(map(string), {})
-          is_null_or_undefined          = optional(map(string), {})
+          is_not_null                   = optional(list(string), [])
+          is_null_or_undefined          = optional(list(string), [])
           number_greater_than           = optional(map(number), {})
           number_greater_than_or_equals = optional(map(number), {})
           number_less_than              = optional(map(number), {})
@@ -348,8 +379,8 @@ variable "config" {
       }), null)
       advanced_filter = optional(object({
         bool_equals                   = optional(map(bool), {})
-        is_not_null                   = optional(map(string), {})
-        is_null_or_undefined          = optional(map(string), {})
+        is_not_null                   = optional(list(string), [])
+        is_null_or_undefined          = optional(list(string), [])
         number_greater_than           = optional(map(number), {})
         number_greater_than_or_equals = optional(map(number), {})
         number_less_than              = optional(map(number), {})
