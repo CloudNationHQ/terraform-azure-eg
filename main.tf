@@ -497,9 +497,13 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
     for item in flatten([
       for topic_key, topic in lookup(var.config, "system_topics", {}) : [
         for sub_key, sub in lookup(topic, "event_subscriptions", {}) : {
+          name = coalesce(
+            sub.name,
+            try(join("-", [var.naming.eventgrid_system_topic_event_subscription, sub_key]), null),
+            sub_key
+          )
           id                                   = "${topic_key}-${sub_key}"
           topic_key                            = topic_key
-          name                                 = sub_key
           topic_name                           = azurerm_eventgrid_system_topic.this[topic_key].name
           included_event_types                 = sub.included_event_types
           event_delivery_schema                = sub.event_delivery_schema
@@ -526,7 +530,8 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
     ]) : item.id => item
   }
 
-  name         = each.key
+  name = each.value.name
+
   system_topic = each.value.topic_name
 
   resource_group_name = coalesce(
