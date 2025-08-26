@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.2.2...v2.3.0) (2025-08-26)
+
+
+### Features
+
+* **deps:** bump github.com/cloudnationhq/az-cn-go-validor in /tests ([#43](https://github.com/CloudNationHQ/terraform-azure-eg/issues/43)) ([d4d035c](https://github.com/CloudNationHQ/terraform-azure-eg/commit/d4d035c1f4831bf6c23ec3ed89adff80c20e9986))
+* update source_resource_id property ([#44](https://github.com/CloudNationHQ/terraform-azure-eg/issues/44)) ([05ce0f6](https://github.com/CloudNationHQ/terraform-azure-eg/commit/05ce0f6291d761f182d47bf7e1aed1b19092bf75))
+
 ## [2.2.2](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.2.1...v2.2.2) (2025-07-29)
 
 
