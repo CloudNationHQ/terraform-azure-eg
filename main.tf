@@ -474,8 +474,8 @@ resource "azurerm_eventgrid_system_topic" "this" {
     ), var.location
   )
 
-  source_arm_resource_id = each.value.source_arm_resource_id
-  topic_type             = each.value.topic_type
+  source_resource_id = coalesce(each.value.source_resource_id, each.value.source_arm_resource_id)
+  topic_type         = each.value.topic_type
 
   tags = coalesce(
     var.config.tags, var.tags

@@ -232,7 +232,8 @@ variable "config" {
     })), {})
     system_topics = optional(map(object({
       name                   = optional(string, null)
-      source_arm_resource_id = string
+      source_arm_resource_id = optional(string)
+      source_resource_id     = optional(string)
       topic_type             = string
       identity = optional(object({
         type         = string

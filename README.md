@@ -289,13 +289,15 @@ object({
     })), {})
     system_topics = optional(map(object({
       name                   = optional(string, null)
-      source_arm_resource_id = string
+      source_arm_resource_id = optional(string)
+      source_resource_id     = optional(string)
       topic_type             = string
       identity = optional(object({
         type         = string
         identity_ids = optional(list(string), null)
       }), null)
       event_subscriptions = optional(map(object({
+        name                                 = optional(string)
         included_event_types                 = optional(list(string), [])
         event_delivery_schema                = optional(string, null)
         service_bus_queue_endpoint_id        = optional(string, null)
