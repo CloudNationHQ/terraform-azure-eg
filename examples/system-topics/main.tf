@@ -80,8 +80,8 @@ module "eventgrid" {
 
     system_topics = {
       storage = {
-        source_arm_resource_id = module.storage.account.id
-        topic_type             = "Microsoft.Storage.StorageAccounts"
+        source_resource_id = module.storage.account.id
+        topic_type         = "Microsoft.Storage.StorageAccounts"
 
         event_subscriptions = local.event_subscriptions
       }
