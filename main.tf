@@ -53,7 +53,17 @@ resource "azurerm_eventgrid_domain" "this" {
     }
   }
 
-  inbound_ip_rule                           = var.config.inbound_ip_rule
+  dynamic "inbound_ip_rule" {
+    for_each = coalesce(
+      var.config.inbound_ip_rule, []
+    )
+
+    content {
+      ip_mask = inbound_ip_rule.value.ip_mask
+      action  = inbound_ip_rule.value.action
+    }
+  }
+
   input_schema                              = var.config.input_schema
   public_network_access_enabled             = var.config.public_network_access_enabled
   auto_delete_topic_with_last_subscription  = var.config.auto_delete_topic_with_last_subscription
@@ -841,7 +851,17 @@ resource "azurerm_eventgrid_topic" "this" {
   input_schema                  = each.value.input_schema
   public_network_access_enabled = each.value.public_network_access_enabled
   local_auth_enabled            = each.value.local_auth_enabled
-  inbound_ip_rule               = each.value.inbound_ip_rule
+
+  dynamic "inbound_ip_rule" {
+    for_each = coalesce(
+      each.value.inbound_ip_rule, []
+    )
+
+    content {
+      ip_mask = inbound_ip_rule.value.ip_mask
+      action  = inbound_ip_rule.value.action
+    }
+  }
 
   tags = coalesce(
     var.config.tags, var.tags
