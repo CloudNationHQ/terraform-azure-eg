@@ -63,8 +63,18 @@ module "eventgrid" {
       notifications = {
         input_schema                  = "CloudEventSchemaV1_0"
         public_network_access_enabled = true
+        event_subscriptions           = local.event_subscriptions
 
-        event_subscriptions = local.event_subscriptions
+        inbound_ip_rule = [
+          {
+            ip_mask = "10.0.0.0/16"
+            action  = "Allow"
+          },
+          {
+            ip_mask = "192.168.1.0/24"
+            action  = "Allow"
+          }
+        ]
       }
     }
   }
