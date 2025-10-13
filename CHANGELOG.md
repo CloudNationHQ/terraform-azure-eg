@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.3.0...v2.4.0) (2025-10-13)
+
+
+### Features
+
+* **deps:** bump github.com/cloudnationhq/az-cn-go-validor in /tests ([#51](https://github.com/CloudNationHQ/terraform-azure-eg/issues/51)) ([294a1cf](https://github.com/CloudNationHQ/terraform-azure-eg/commit/294a1cfc09e8c81d1b3fd3e3302a6f6867133350))
+* **deps:** bump github.com/ulikunitz/xz from 0.5.10 to 0.5.14 in /tests ([#47](https://github.com/CloudNationHQ/terraform-azure-eg/issues/47)) ([ab92f2c](https://github.com/CloudNationHQ/terraform-azure-eg/commit/ab92f2c46bde2beb4ac5364db20cef9f0bada065))
+
+
+### Bug Fixes
+
+* emit inbound_ip_rule blocks and drop redundant null defaults ([#52](https://github.com/CloudNationHQ/terraform-azure-eg/issues/52)) ([4095ff3](https://github.com/CloudNationHQ/terraform-azure-eg/commit/4095ff3a1e811ff7e04376f09c28d399cb252bd1))
+
 ## [2.3.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.2.2...v2.3.0) (2025-08-26)
 
 
