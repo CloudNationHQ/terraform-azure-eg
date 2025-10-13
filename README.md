@@ -61,10 +61,6 @@ object({
     resource_group_name = optional(string)
     location            = optional(string)
     tags                = optional(map(string))
-    inbound_ip_rule = optional(list(object({
-      ip_mask = string
-      action  = optional(string, "Allow")
-    })))
     input_schema                              = optional(string, "EventGridSchema")
     public_network_access_enabled             = optional(bool, true)
     auto_delete_topic_with_last_subscription  = optional(bool, false)
@@ -76,6 +72,10 @@ object({
     }))
     domains = optional(map(object({
       name = optional(string)
+      inbound_ip_rule = optional(list(object({
+        ip_mask = string
+        action  = optional(string, "Allow")
+      })))
       input_mapping_default_values = optional(object({
         data_version = optional(string)
         event_type   = optional(string)

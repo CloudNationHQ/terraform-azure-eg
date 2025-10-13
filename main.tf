@@ -54,9 +54,7 @@ resource "azurerm_eventgrid_domain" "this" {
   }
 
   dynamic "inbound_ip_rule" {
-    for_each = coalesce(
-      var.config.inbound_ip_rule, []
-    )
+    for_each = lookup(each.value, "inbound_ip_rule", null) != null ? each.value.inbound_ip_rule : []
 
     content {
       ip_mask = inbound_ip_rule.value.ip_mask
@@ -853,9 +851,7 @@ resource "azurerm_eventgrid_topic" "this" {
   local_auth_enabled            = each.value.local_auth_enabled
 
   dynamic "inbound_ip_rule" {
-    for_each = coalesce(
-      each.value.inbound_ip_rule, []
-    )
+    for_each = lookup(each.value, "inbound_ip_rule", null) != null ? each.value.inbound_ip_rule : []
 
     content {
       ip_mask = inbound_ip_rule.value.ip_mask
