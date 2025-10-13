@@ -1,13 +1,9 @@
 variable "config" {
   description = "Contains all eventgrid configuration"
   type = object({
-    resource_group_name = optional(string, null)
-    location            = optional(string, null)
+    resource_group_name = optional(string)
+    location            = optional(string)
     tags                = optional(map(string))
-    inbound_ip_rule = optional(list(object({
-      ip_mask = string
-      action  = optional(string, "Allow")
-    })), null)
     input_schema                              = optional(string, "EventGridSchema")
     public_network_access_enabled             = optional(bool, true)
     auto_delete_topic_with_last_subscription  = optional(bool, false)
@@ -15,64 +11,68 @@ variable "config" {
     auto_create_topic_with_first_subscription = optional(bool, false)
     identity = optional(object({
       type         = string
-      identity_ids = optional(list(string), null)
-    }), null)
+      identity_ids = optional(list(string))
+    }))
     domains = optional(map(object({
-      name = optional(string, null)
+      name = optional(string)
+      inbound_ip_rule = optional(list(object({
+        ip_mask = string
+        action  = optional(string, "Allow")
+      })))
       input_mapping_default_values = optional(object({
-        data_version = optional(string, null)
-        event_type   = optional(string, null)
-        subject      = optional(string, null)
-      }), null)
+        data_version = optional(string)
+        event_type   = optional(string)
+        subject      = optional(string)
+      }))
       input_mapping_fields = optional(object({
-        id           = optional(string, null)
-        topic        = optional(string, null)
-        subject      = optional(string, null)
-        event_time   = optional(string, null)
-        event_type   = optional(string, null)
-        data_version = optional(string, null)
-      }), null)
+        id           = optional(string)
+        topic        = optional(string)
+        subject      = optional(string)
+        event_time   = optional(string)
+        event_type   = optional(string)
+        data_version = optional(string)
+      }))
       domain_topics = optional(map(object({
-        name = optional(string, null)
+        name = optional(string)
         event_subscriptions = optional(map(object({
-          name                                 = optional(string, null)
-          event_delivery_schema                = optional(string, null)
-          included_event_types                 = optional(list(string), null)
-          labels                               = optional(list(string), null)
-          hybrid_connection_endpoint_id        = optional(string, null)
+          name                                 = optional(string)
+          event_delivery_schema                = optional(string)
+          included_event_types                 = optional(list(string))
+          labels                               = optional(list(string))
+          hybrid_connection_endpoint_id        = optional(string)
           advanced_filtering_on_arrays_enabled = optional(bool, false)
-          expiration_time_utc                  = optional(string, null)
-          service_bus_queue_endpoint_id        = optional(string, null)
-          service_bus_topic_endpoint_id        = optional(string, null)
-          eventhub_endpoint_id                 = optional(string, null)
-          endpoint_type                        = optional(string, null)
-          endpoint_id                          = optional(string, null)
+          expiration_time_utc                  = optional(string)
+          service_bus_queue_endpoint_id        = optional(string)
+          service_bus_topic_endpoint_id        = optional(string)
+          eventhub_endpoint_id                 = optional(string)
+          endpoint_type                        = optional(string)
+          endpoint_id                          = optional(string)
           azure_function_endpoint = optional(object({
             function_id                       = string
-            max_events_per_batch              = optional(number, null)
-            preferred_batch_size_in_kilobytes = optional(number, null)
-          }), null)
+            max_events_per_batch              = optional(number)
+            preferred_batch_size_in_kilobytes = optional(number)
+          }))
           webhook_endpoint = optional(object({
             url                               = string
-            preferred_batch_size_in_kilobytes = optional(number, null)
-            max_events_per_batch              = optional(number, null)
-            active_directory_tenant_id        = optional(string, null)
-            active_directory_app_id_or_uri    = optional(string, null)
-          }), null)
+            preferred_batch_size_in_kilobytes = optional(number)
+            max_events_per_batch              = optional(number)
+            active_directory_tenant_id        = optional(string)
+            active_directory_app_id_or_uri    = optional(string)
+          }))
           retry_policy = optional(object({
             max_delivery_attempts = number
             event_time_to_live    = number
-          }), null)
+          }))
           subject_filter = optional(object({
             subject_begins_with = optional(string, "/")
-            subject_ends_with   = optional(string, null)
+            subject_ends_with   = optional(string)
             case_sensitive      = optional(bool, false)
-          }), null)
+          }))
           filters = optional(object({
             subject_begins_with = optional(string, "/")
-            subject_ends_with   = optional(string, null)
+            subject_ends_with   = optional(string)
             case_sensitive      = optional(bool, false)
-          }), null)
+          }))
           advanced_filter = optional(object({
             bool_equals                   = optional(map(bool), {})
             is_not_null                   = optional(list(string), [])
@@ -93,96 +93,99 @@ variable "config" {
             string_not_begins_with        = optional(map(list(string)), {})
             number_in_range               = optional(map(list(number)), {})
             number_not_in_range           = optional(map(list(number)), {})
-          }), null)
+          }))
           delivery_property_mappings = optional(map(object({
             header_name  = string
             type         = string
-            value        = optional(string, null)
-            source_field = optional(string, null)
-            secret       = optional(string, null)
+            value        = optional(string)
+            source_field = optional(string)
+            secret       = optional(string)
           })), {})
           dead_letter_identity = optional(object({
             type                   = string
-            user_assigned_identity = optional(string, null)
-          }), null)
+            user_assigned_identity = optional(string)
+          }))
           delivery_identity = optional(object({
             type                   = string
-            user_assigned_identity = optional(string, null)
-          }), null)
+            user_assigned_identity = optional(string)
+          }))
           storage_blob_dead_letter_destination = optional(object({
             storage_account_id          = string
             storage_blob_container_name = string
-          }), null)
+          }))
           storage_queue_endpoint = optional(object({
             storage_account_id                    = string
             queue_name                            = string
-            queue_message_time_to_live_in_seconds = optional(number, null)
-          }), null)
+            queue_message_time_to_live_in_seconds = optional(number)
+          }))
         })), {})
       })), {})
     })), {})
     custom_topics = optional(map(object({
-      name                          = optional(string, null)
+      name                          = optional(string)
       input_schema                  = optional(string, "EventGridSchema")
       public_network_access_enabled = optional(bool, true)
       local_auth_enabled            = optional(bool, false)
-      inbound_ip_rule               = optional(any, null)
+      inbound_ip_rule = optional(list(object({
+        ip_mask = string
+        action  = optional(string, "Allow")
+      })))
       identity = optional(object({
         type         = string
-        identity_ids = optional(list(string), null)
-      }), null)
+        identity_ids = optional(list(string))
+      }))
       input_mapping_fields = optional(object({
-        id           = optional(string, null)
-        topic        = optional(string, null)
-        subject      = optional(string, null)
-        event_time   = optional(string, null)
-        event_type   = optional(string, null)
-        data_version = optional(string, null)
-      }), null)
+        id           = optional(string)
+        topic        = optional(string)
+        subject      = optional(string)
+        event_time   = optional(string)
+        event_type   = optional(string)
+        data_version = optional(string)
+      }))
       input_mapping_default_values = optional(object({
-        data_version = optional(string, null)
-        event_type   = optional(string, null)
-        subject      = optional(string, null)
-      }), null)
+        data_version = optional(string)
+        event_type   = optional(string)
+        subject      = optional(string)
+      }))
       event_subscriptions = optional(map(object({
-        name                                 = optional(string, null)
-        event_delivery_schema                = optional(string, null)
-        included_event_types                 = optional(list(string), null)
-        labels                               = optional(list(string), null)
-        hybrid_connection_endpoint_id        = optional(string, null)
+        name                                 = optional(string)
+        event_delivery_schema                = optional(string)
+        included_event_types                 = optional(list(string))
+        labels                               = optional(list(string))
+        hybrid_connection_endpoint_id        = optional(string)
         advanced_filtering_on_arrays_enabled = optional(bool, false)
-        expiration_time_utc                  = optional(string, null)
-        service_bus_queue_endpoint_id        = optional(string, null)
-        service_bus_topic_endpoint_id        = optional(string, null)
-        eventhub_endpoint_id                 = optional(string, null)
-        endpoint_type                        = optional(string, null)
-        endpoint_id                          = optional(string, null)
+        expiration_time_utc                  = optional(string)
+        service_bus_queue_endpoint_id        = optional(string)
+        service_bus_topic_endpoint_id        = optional(string)
+        eventhub_endpoint_id                 = optional(string)
+        endpoint_type                        = optional(string)
+        endpoint_id                          = optional(string)
         azure_function_endpoint = optional(object({
           function_id                       = string
-          max_events_per_batch              = optional(number, null)
-          preferred_batch_size_in_kilobytes = optional(number, null)
-        }), null)
+          max_events_per_batch              = optional(number)
+          preferred_batch_size_in_kilobytes = optional(number)
+        }))
         webhook_endpoint = optional(object({
           url                               = string
-          preferred_batch_size_in_kilobytes = optional(number, null)
-          max_events_per_batch              = optional(number, null)
-          active_directory_tenant_id        = optional(string, null)
-          active_directory_app_id_or_uri    = optional(string, null)
-        }), null)
+          preferred_batch_size_in_kilobytes = optional(number)
+          max_events_per_batch              = optional(number)
+          active_directory_tenant_id        = optional(string)
+          active_directory_app_id_or_uri    = optional(string)
+        }))
         retry_policy = optional(object({
           max_delivery_attempts = number
           event_time_to_live    = number
-        }), null)
+        }))
         subject_filter = optional(object({
           subject_begins_with = optional(string, "/")
-          subject_ends_with   = optional(string, null)
+          subject_ends_with   = optional(string)
           case_sensitive      = optional(bool, false)
-        }), null)
+        }))
         filters = optional(object({
           subject_begins_with = optional(string, "/")
-          subject_ends_with   = optional(string, null)
+          subject_ends_with   = optional(string)
           case_sensitive      = optional(bool, false)
-        }), null)
+        }))
         advanced_filter = optional(object({
           bool_equals                   = optional(map(bool), {})
           is_not_null                   = optional(list(string), [])
@@ -203,102 +206,102 @@ variable "config" {
           string_not_in                 = optional(map(list(string)), {})
           number_in                     = optional(map(list(number)), {})
           number_not_in                 = optional(map(list(number)), {})
-        }), null)
+        }))
         delivery_property_mappings = optional(map(object({
           header_name  = string
           type         = string
-          value        = optional(string, null)
-          source_field = optional(string, null)
-          secret       = optional(string, null)
+          value        = optional(string)
+          source_field = optional(string)
+          secret       = optional(string)
         })), {})
         dead_letter_identity = optional(object({
           type                   = string
-          user_assigned_identity = optional(string, null)
-        }), null)
+          user_assigned_identity = optional(string)
+        }))
         delivery_identity = optional(object({
           type                   = string
-          user_assigned_identity = optional(string, null)
-        }), null)
+          user_assigned_identity = optional(string)
+        }))
         storage_blob_dead_letter_destination = optional(object({
           storage_account_id          = string
           storage_blob_container_name = string
-        }), null)
+        }))
         storage_queue_endpoint = optional(object({
           storage_account_id                    = string
           queue_name                            = string
-          queue_message_time_to_live_in_seconds = optional(number, null)
-        }), null)
+          queue_message_time_to_live_in_seconds = optional(number)
+        }))
       })), {})
     })), {})
     system_topics = optional(map(object({
-      name                   = optional(string, null)
+      name                   = optional(string)
       source_arm_resource_id = optional(string)
       source_resource_id     = optional(string)
       topic_type             = string
       identity = optional(object({
         type         = string
-        identity_ids = optional(list(string), null)
-      }), null)
+        identity_ids = optional(list(string))
+      }))
       event_subscriptions = optional(map(object({
         name                                 = optional(string)
         included_event_types                 = optional(list(string), [])
-        event_delivery_schema                = optional(string, null)
-        service_bus_queue_endpoint_id        = optional(string, null)
-        service_bus_topic_endpoint_id        = optional(string, null)
-        eventhub_endpoint_id                 = optional(string, null)
+        event_delivery_schema                = optional(string)
+        service_bus_queue_endpoint_id        = optional(string)
+        service_bus_topic_endpoint_id        = optional(string)
+        eventhub_endpoint_id                 = optional(string)
         labels                               = optional(list(string), [])
-        expiration_time_utc                  = optional(string, null)
+        expiration_time_utc                  = optional(string)
         advanced_filtering_on_arrays_enabled = optional(bool, false)
-        hybrid_connection_endpoint_id        = optional(string, null)
+        hybrid_connection_endpoint_id        = optional(string)
         delivery_property_mappings = optional(map(object({
           header_name  = string
           type         = string
-          value        = optional(string, null)
-          source_field = optional(string, null)
-          secret       = optional(string, null)
+          value        = optional(string)
+          source_field = optional(string)
+          secret       = optional(string)
         })), {})
         identity = optional(object({
           type         = string
-          identity_ids = optional(list(string), null)
-        }), null)
+          identity_ids = optional(list(string))
+        }))
         storage_blob_dead_letter_destination = optional(object({
           storage_account_id          = string
           storage_blob_container_name = string
-        }), null)
+        }))
         storage_queue_endpoint = optional(object({
           storage_account_id                    = string
           queue_name                            = string
-          queue_message_time_to_live_in_seconds = optional(number, null)
-        }), null)
+          queue_message_time_to_live_in_seconds = optional(number)
+        }))
         delivery_identity = optional(object({
           type                   = string
-          user_assigned_identity = optional(string, null)
-        }), null)
+          user_assigned_identity = optional(string)
+        }))
         dead_letter_identity = optional(object({
           type                   = string
-          user_assigned_identity = optional(string, null)
-        }), null)
+          user_assigned_identity = optional(string)
+        }))
         azure_function_endpoint = optional(object({
           function_id                       = string
-          max_events_per_batch              = optional(number, null)
-          preferred_batch_size_in_kilobytes = optional(number, null)
-        }), null)
+          max_events_per_batch              = optional(number)
+          preferred_batch_size_in_kilobytes = optional(number)
+        }))
         webhook_endpoint = optional(object({
           url                               = string
-          preferred_batch_size_in_kilobytes = optional(number, null)
-          max_events_per_batch              = optional(number, null)
-          active_directory_app_id_or_uri    = optional(string, null)
-          active_directory_tenant_id        = optional(string, null)
-        }), null)
+          preferred_batch_size_in_kilobytes = optional(number)
+          max_events_per_batch              = optional(number)
+          active_directory_app_id_or_uri    = optional(string)
+          active_directory_tenant_id        = optional(string)
+        }))
         subject_filter = optional(object({
           subject_begins_with = optional(string, "/")
-          subject_ends_with   = optional(string, null)
+          subject_ends_with   = optional(string)
           case_sensitive      = optional(bool, false)
-        }), null)
+        }))
         retry_policy = optional(object({
           max_delivery_attempts = number
           event_time_to_live    = number
-        }), null)
+        }))
         advanced_filter = optional(object({
           bool_equals                   = optional(map(bool), {})
           is_not_null                   = optional(list(string), [])
@@ -319,66 +322,66 @@ variable "config" {
           string_not_begins_with        = optional(map(list(string)), {})
           number_in_range               = optional(map(list(number)), {})
           number_not_in_range           = optional(map(list(number)), {})
-        }), null)
+        }))
       })), {})
     })), {})
     event_subscriptions = optional(map(object({
-      name                                 = optional(string, null)
+      name                                 = optional(string)
       scope                                = string
-      event_delivery_schema                = optional(string, null)
-      included_event_types                 = optional(list(string), null)
-      labels                               = optional(list(string), null)
-      hybrid_connection_endpoint_id        = optional(string, null)
+      event_delivery_schema                = optional(string)
+      included_event_types                 = optional(list(string))
+      labels                               = optional(list(string))
+      hybrid_connection_endpoint_id        = optional(string)
       advanced_filtering_on_arrays_enabled = optional(bool, false)
-      expiration_time_utc                  = optional(string, null)
-      service_bus_queue_endpoint_id        = optional(string, null)
-      service_bus_topic_endpoint_id        = optional(string, null)
-      eventhub_endpoint_id                 = optional(string, null)
-      endpoint_type                        = optional(string, null)
-      endpoint_id                          = optional(string, null)
+      expiration_time_utc                  = optional(string)
+      service_bus_queue_endpoint_id        = optional(string)
+      service_bus_topic_endpoint_id        = optional(string)
+      eventhub_endpoint_id                 = optional(string)
+      endpoint_type                        = optional(string)
+      endpoint_id                          = optional(string)
       dead_letter_identity = optional(object({
         type                   = string
-        user_assigned_identity = optional(string, null)
-      }), null)
+        user_assigned_identity = optional(string)
+      }))
       storage_blob_dead_letter_destination = optional(object({
         storage_account_id          = string
         storage_blob_container_name = string
-      }), null)
+      }))
       storage_queue_endpoint = optional(object({
         storage_account_id                    = string
         queue_name                            = string
-        queue_message_time_to_live_in_seconds = optional(number, null)
-      }), null)
+        queue_message_time_to_live_in_seconds = optional(number)
+      }))
       delivery_identity = optional(object({
         type                   = string
-        user_assigned_identity = optional(string, null)
-      }), null)
+        user_assigned_identity = optional(string)
+      }))
       azure_function_endpoint = optional(object({
         function_id                       = string
-        max_events_per_batch              = optional(number, null)
-        preferred_batch_size_in_kilobytes = optional(number, null)
-      }), null)
+        max_events_per_batch              = optional(number)
+        preferred_batch_size_in_kilobytes = optional(number)
+      }))
       webhook_endpoint = optional(object({
         url                               = string
-        preferred_batch_size_in_kilobytes = optional(number, null)
-        max_events_per_batch              = optional(number, null)
-        active_directory_tenant_id        = optional(string, null)
-        active_directory_app_id_or_uri    = optional(string, null)
-      }), null)
+        preferred_batch_size_in_kilobytes = optional(number)
+        max_events_per_batch              = optional(number)
+        active_directory_tenant_id        = optional(string)
+        active_directory_app_id_or_uri    = optional(string)
+      }))
       retry_policy = optional(object({
         max_delivery_attempts = number
         event_time_to_live    = number
-      }), null)
+      }))
       subject_filter = optional(object({
         subject_begins_with = optional(string, "/")
-        subject_ends_with   = optional(string, null)
+        subject_ends_with   = optional(string)
         case_sensitive      = optional(bool, false)
-      }), null)
+      }))
       filters = optional(object({
         subject_begins_with = optional(string, "/")
-        subject_ends_with   = optional(string, null)
+        subject_ends_with   = optional(string)
         case_sensitive      = optional(bool, false)
-      }), null)
+      }))
       advanced_filter = optional(object({
         bool_equals                   = optional(map(bool), {})
         is_not_null                   = optional(list(string), [])
@@ -399,13 +402,13 @@ variable "config" {
         string_not_begins_with        = optional(map(list(string)), {})
         number_in_range               = optional(map(list(number)), {})
         number_not_in_range           = optional(map(list(number)), {})
-      }), null)
+      }))
       delivery_property_mappings = optional(map(object({
         header_name  = string
         type         = string
-        value        = optional(string, null)
-        source_field = optional(string, null)
-        secret       = optional(string, null)
+        value        = optional(string)
+        source_field = optional(string)
+        secret       = optional(string)
       })), {})
     })), {})
   })
