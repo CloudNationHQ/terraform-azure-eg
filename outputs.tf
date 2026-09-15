@@ -11,6 +11,7 @@ output "domain_topics" {
 output "event_subscriptions" {
   description = "contains event subscriptions configuration"
   value       = azurerm_eventgrid_event_subscription.this
+  sensitive   = true
 }
 
 output "system_topics" {
@@ -21,6 +22,7 @@ output "system_topics" {
 output "system_topic_event_subscriptions" {
   description = "contains system topic event subscriptions configuration"
   value       = azurerm_eventgrid_system_topic_event_subscription.this
+  sensitive   = true
 }
 
 output "custom_topics" {

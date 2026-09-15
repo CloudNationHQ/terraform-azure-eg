@@ -1,14 +1,14 @@
-variable "config" {
+variable "eventgrid" {
   description = "Contains all eventgrid configuration"
   type = object({
-    resource_group_name = optional(string)
-    location            = optional(string)
-    tags                = optional(map(string))
-    input_schema                              = optional(string, "EventGridSchema")
-    public_network_access_enabled             = optional(bool, true)
-    auto_delete_topic_with_last_subscription  = optional(bool, false)
-    local_auth_enabled                        = optional(bool, false)
-    auto_create_topic_with_first_subscription = optional(bool, false)
+    resource_group_name                       = optional(string)
+    location                                  = optional(string)
+    tags                                      = optional(map(string))
+    input_schema                              = optional(string)
+    public_network_access_enabled             = optional(bool)
+    auto_delete_topic_with_last_subscription  = optional(bool)
+    local_auth_enabled                        = optional(bool)
+    auto_create_topic_with_first_subscription = optional(bool)
     identity = optional(object({
       type         = string
       identity_ids = optional(list(string))
@@ -17,8 +17,8 @@ variable "config" {
       name = optional(string)
       inbound_ip_rule = optional(list(object({
         ip_mask = string
-        action  = optional(string, "Allow")
-      })))
+        action  = optional(string)
+      })), [])
       input_mapping_default_values = optional(object({
         data_version = optional(string)
         event_type   = optional(string)
@@ -37,11 +37,11 @@ variable "config" {
         event_subscriptions = optional(map(object({
           name                                 = optional(string)
           event_delivery_schema                = optional(string)
-          included_event_types                 = optional(list(string))
           labels                               = optional(list(string))
-          hybrid_connection_endpoint_id        = optional(string)
-          advanced_filtering_on_arrays_enabled = optional(bool, false)
           expiration_time_utc                  = optional(string)
+          included_event_types                 = optional(list(string))
+          advanced_filtering_on_arrays_enabled = optional(bool)
+          hybrid_connection_endpoint_id        = optional(string)
           service_bus_queue_endpoint_id        = optional(string)
           service_bus_topic_endpoint_id        = optional(string)
           eventhub_endpoint_id                 = optional(string)
@@ -123,12 +123,12 @@ variable "config" {
     })), {})
     custom_topics = optional(map(object({
       name                          = optional(string)
-      input_schema                  = optional(string, "EventGridSchema")
-      public_network_access_enabled = optional(bool, true)
-      local_auth_enabled            = optional(bool, false)
+      input_schema                  = optional(string)
+      public_network_access_enabled = optional(bool)
+      local_auth_enabled            = optional(bool)
       inbound_ip_rule = optional(list(object({
         ip_mask = string
-        action  = optional(string, "Allow")
+        action  = optional(string)
       })))
       identity = optional(object({
         type         = string
@@ -150,11 +150,11 @@ variable "config" {
       event_subscriptions = optional(map(object({
         name                                 = optional(string)
         event_delivery_schema                = optional(string)
-        included_event_types                 = optional(list(string))
         labels                               = optional(list(string))
-        hybrid_connection_endpoint_id        = optional(string)
-        advanced_filtering_on_arrays_enabled = optional(bool, false)
         expiration_time_utc                  = optional(string)
+        included_event_types                 = optional(list(string))
+        advanced_filtering_on_arrays_enabled = optional(bool)
+        hybrid_connection_endpoint_id        = optional(string)
         service_bus_queue_endpoint_id        = optional(string)
         service_bus_topic_endpoint_id        = optional(string)
         eventhub_endpoint_id                 = optional(string)
@@ -234,25 +234,24 @@ variable "config" {
       })), {})
     })), {})
     system_topics = optional(map(object({
-      name                   = optional(string)
-      source_arm_resource_id = optional(string)
-      source_resource_id     = optional(string)
-      topic_type             = string
+      name               = optional(string)
+      source_resource_id = optional(string)
+      topic_type         = string
       identity = optional(object({
         type         = string
         identity_ids = optional(list(string))
       }))
       event_subscriptions = optional(map(object({
         name                                 = optional(string)
-        included_event_types                 = optional(list(string), [])
         event_delivery_schema                = optional(string)
+        labels                               = optional(list(string), [])
+        expiration_time_utc                  = optional(string)
+        included_event_types                 = optional(list(string))
+        advanced_filtering_on_arrays_enabled = optional(bool)
+        hybrid_connection_endpoint_id        = optional(string)
         service_bus_queue_endpoint_id        = optional(string)
         service_bus_topic_endpoint_id        = optional(string)
         eventhub_endpoint_id                 = optional(string)
-        labels                               = optional(list(string), [])
-        expiration_time_utc                  = optional(string)
-        advanced_filtering_on_arrays_enabled = optional(bool, false)
-        hybrid_connection_endpoint_id        = optional(string)
         delivery_property_mappings = optional(map(object({
           header_name  = string
           type         = string
@@ -329,11 +328,11 @@ variable "config" {
       name                                 = optional(string)
       scope                                = string
       event_delivery_schema                = optional(string)
-      included_event_types                 = optional(list(string))
       labels                               = optional(list(string))
       hybrid_connection_endpoint_id        = optional(string)
-      advanced_filtering_on_arrays_enabled = optional(bool, false)
       expiration_time_utc                  = optional(string)
+      included_event_types                 = optional(list(string))
+      advanced_filtering_on_arrays_enabled = optional(bool)
       service_bus_queue_endpoint_id        = optional(string)
       service_bus_topic_endpoint_id        = optional(string)
       eventhub_endpoint_id                 = optional(string)
@@ -413,21 +412,16 @@ variable "config" {
     })), {})
   })
   validation {
-    condition     = var.config.location != null || var.location != null
+    condition     = var.eventgrid.location != null || var.location != null
     error_message = "location must be provided either in the config object or as a separate variable."
   }
 
   validation {
-    condition     = var.config.resource_group_name != null || var.resource_group_name != null
+    condition     = var.eventgrid.resource_group_name != null || var.resource_group_name != null
     error_message = "resource group name must be provided either in the config object or as a separate variable."
   }
 }
 
-variable "naming" {
-  description = "contains naming convention"
-  type        = map(string)
-  default     = {}
-}
 
 variable "location" {
   description = "default azure region to be used."
