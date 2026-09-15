@@ -1,28 +1,21 @@
 # domains
 resource "azurerm_eventgrid_domain" "this" {
-  for_each = lookup(
-    var.config, "domains", {}
-  )
+  for_each = var.eventgrid.domains
 
   resource_group_name = coalesce(
-    lookup(
-      var.config, "resource_group_name", null
-    ), var.resource_group_name
+    var.eventgrid.resource_group_name, var.resource_group_name
   )
 
   location = coalesce(
-    lookup(var.config, "location", null
-    ), var.location
+    var.eventgrid.location, var.location
   )
 
   name = coalesce(
-    each.value.name, try(
-      join("-", [var.naming.eventgrid_domain, each.key]), null
-    ), each.key
+    each.value.name, each.key
   )
 
   dynamic "input_mapping_default_values" {
-    for_each = lookup(each.value, "input_mapping_default_values", null) != null ? { "default" = each.value.input_mapping_default_values } : {}
+    for_each = each.value.input_mapping_default_values != null ? { "this" = each.value.input_mapping_default_values } : {}
 
     content {
       subject      = input_mapping_default_values.value.subject
@@ -32,7 +25,7 @@ resource "azurerm_eventgrid_domain" "this" {
   }
 
   dynamic "input_mapping_fields" {
-    for_each = lookup(each.value, "input_mapping_fields", null) != null ? { "default" = each.value.input_mapping_fields } : {}
+    for_each = each.value.input_mapping_fields != null ? { "this" = each.value.input_mapping_fields } : {}
 
     content {
       id           = input_mapping_fields.value.id
@@ -45,7 +38,7 @@ resource "azurerm_eventgrid_domain" "this" {
   }
 
   dynamic "identity" {
-    for_each = lookup(var.config, "identity", null) != null ? [var.config.identity] : []
+    for_each = var.eventgrid.identity != null ? { "this" = var.eventgrid.identity } : {}
 
     content {
       type         = identity.value.type
@@ -54,7 +47,7 @@ resource "azurerm_eventgrid_domain" "this" {
   }
 
   dynamic "inbound_ip_rule" {
-    for_each = lookup(each.value, "inbound_ip_rule", null) != null ? each.value.inbound_ip_rule : []
+    for_each = each.value.inbound_ip_rule
 
     content {
       ip_mask = inbound_ip_rule.value.ip_mask
@@ -62,38 +55,34 @@ resource "azurerm_eventgrid_domain" "this" {
     }
   }
 
-  input_schema                              = var.config.input_schema
-  public_network_access_enabled             = var.config.public_network_access_enabled
-  auto_delete_topic_with_last_subscription  = var.config.auto_delete_topic_with_last_subscription
-  local_auth_enabled                        = var.config.local_auth_enabled
-  auto_create_topic_with_first_subscription = var.config.auto_create_topic_with_first_subscription
+  input_schema                              = var.eventgrid.input_schema
+  public_network_access_enabled             = var.eventgrid.public_network_access_enabled
+  auto_delete_topic_with_last_subscription  = var.eventgrid.auto_delete_topic_with_last_subscription
+  local_auth_enabled                        = var.eventgrid.local_auth_enabled
+  auto_create_topic_with_first_subscription = var.eventgrid.auto_create_topic_with_first_subscription
 
   tags = coalesce(
-    var.config.tags, var.tags
+    var.eventgrid.tags, var.tags
   )
 }
 
 # domain topics
 resource "azurerm_eventgrid_domain_topic" "this" {
   for_each = merge(flatten([
-    for domain_key, domain in lookup(var.config, "domains", {}) : {
-      for topic_key, topic in lookup(domain, "domain_topics", {}) :
+    for domain_key, domain in var.eventgrid.domains : {
+      for topic_key, topic in domain.domain_topics :
       "${domain_key}-${topic_key}" => {
         domain_name = azurerm_eventgrid_domain.this[domain_key].name
         domain_key  = domain_key
         name = coalesce(
-          topic.name, try(
-            join("-", [var.naming.eventgrid_domain_topic, topic_key]), null
-          ), topic_key
+          topic.name, topic_key
         )
       }
     }
   ])...)
 
   resource_group_name = coalesce(
-    lookup(
-      var.config, "resource_group_name", null
-    ), var.resource_group_name
+    var.eventgrid.resource_group_name, var.resource_group_name
   )
 
   name        = each.value.name
@@ -102,95 +91,57 @@ resource "azurerm_eventgrid_domain_topic" "this" {
 
 # subscriptions
 resource "azurerm_eventgrid_event_subscription" "this" {
-  for_each = merge({
+  for_each = merge(flatten([
     # domain topic subscriptions
-    for item in flatten([
-      for domain_key, domain in lookup(var.config, "domains", {}) : [
-        for topic_key, topic in lookup(domain, "domain_topics", {}) : [
-          for sub_key, sub in lookup(topic, "event_subscriptions", {}) : {
-            id           = "${domain_key}-${topic_key}-${sub_key}"
-            domain_key   = domain_key
-            topic_key    = topic_key
-            subscription = sub
-            name = coalesce(
-              sub.name, try(
-                join("-", [var.naming.eventgrid_event_subscription, sub_key]), null
-              ), sub_key
-            )
-          }
-        ]
-      ]
-      ]) : item.id => {
-
-      name         = item.name
-      scope        = azurerm_eventgrid_domain_topic.this["${item.domain_key}-${item.topic_key}"].id
-      subscription = item.subscription
-    }
-    },
-    # custom topic subscriptions
-    {
-      for item in flatten([
-        for topic_key, topic in lookup(var.config, "custom_topics", {}) : [
-          for sub_key, sub in lookup(topic, "event_subscriptions", {}) : {
-            id           = "${topic_key}-${sub_key}"
-            topic_key    = topic_key
-            subscription = sub
-            name = coalesce(
-              sub.name, try(
-                join("-", [var.naming.eventgrid_event_subscription, sub_key]), null
-              ), sub_key
-            )
-          }
-        ]
-        ]) : item.id => {
-
-        name         = item.name
-        scope        = azurerm_eventgrid_topic.this[item.topic_key].id
-        subscription = item.subscription
+    [for domain_key, domain in var.eventgrid.domains : [
+      for topic_key, topic in domain.domain_topics : {
+        for sub_key, sub in topic.event_subscriptions :
+        "${domain_key}-${topic_key}-${sub_key}" => {
+          scope        = azurerm_eventgrid_domain_topic.this["${domain_key}-${topic_key}"].id
+          subscription = sub
+          name = coalesce(
+            sub.name, sub_key
+          )
+        }
       }
-    },
+    ]],
+    # custom topic subscriptions
+    [for topic_key, topic in var.eventgrid.custom_topics : {
+      for sub_key, sub in topic.event_subscriptions :
+      "${topic_key}-${sub_key}" => {
+        scope        = azurerm_eventgrid_topic.this[topic_key].id
+        subscription = sub
+        name = coalesce(
+          sub.name, sub_key
+        )
+      }
+    }],
     # standalone subscriptions
-    {
-      for key, sub in lookup(var.config, "event_subscriptions", {}) : key => {
+    [{
+      for key, sub in var.eventgrid.event_subscriptions : key => {
         scope        = sub.scope
         subscription = sub
         name = coalesce(
-          sub.name, try(
-            join("-", [var.naming.eventgrid_event_subscription, key]), null
-          ), key
+          sub.name, key
         )
       }
-    }
-  )
+    }]
+  ])...)
 
   name                                 = each.value.name
   scope                                = each.value.scope
   event_delivery_schema                = each.value.subscription.event_delivery_schema
-  included_event_types                 = each.value.subscription.included_event_types
   labels                               = each.value.subscription.labels
-  hybrid_connection_endpoint_id        = each.value.subscription.hybrid_connection_endpoint_id
-  advanced_filtering_on_arrays_enabled = each.value.subscription.advanced_filtering_on_arrays_enabled
   expiration_time_utc                  = each.value.subscription.expiration_time_utc
-
-  service_bus_queue_endpoint_id = lookup(
-    each.value.subscription, "service_bus_queue_endpoint_id",
-    lookup(each.value.subscription, "endpoint_type", null) == "servicebus_queue" ?
-    lookup(each.value.subscription, "endpoint_id", null) : null
-  )
-  service_bus_topic_endpoint_id = lookup(
-    each.value.subscription, "service_bus_topic_endpoint_id",
-    lookup(each.value.subscription, "endpoint_type", null) == "servicebus_topic" ?
-    lookup(each.value.subscription, "endpoint_id", null) : null
-  )
-  eventhub_endpoint_id = lookup(
-    each.value.subscription, "eventhub_endpoint_id",
-    lookup(each.value.subscription, "endpoint_type", null) == "eventhub" ?
-    lookup(each.value.subscription, "endpoint_id", null) : null
-  )
-
+  included_event_types                 = each.value.subscription.included_event_types
+  advanced_filtering_on_arrays_enabled = each.value.subscription.advanced_filtering_on_arrays_enabled
+  hybrid_connection_id                 = each.value.subscription.hybrid_connection_endpoint_id
+  eventhub_id                          = each.value.subscription.eventhub_endpoint_id
+  service_bus_queue_id                 = each.value.subscription.service_bus_queue_endpoint_id
+  service_bus_topic_id                 = each.value.subscription.service_bus_topic_endpoint_id
 
   dynamic "dead_letter_identity" {
-    for_each = lookup(each.value.subscription, "dead_letter_identity", null) != null ? { "default" = each.value.subscription.dead_letter_identity } : {}
+    for_each = each.value.subscription.dead_letter_identity != null ? { "this" = each.value.subscription.dead_letter_identity } : {}
 
     content {
       type                   = dead_letter_identity.value.type
@@ -199,7 +150,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "delivery_identity" {
-    for_each = lookup(each.value.subscription, "delivery_identity", null) != null ? { "default" = each.value.subscription.delivery_identity } : {}
+    for_each = each.value.subscription.delivery_identity != null ? { "this" = each.value.subscription.delivery_identity } : {}
 
     content {
       type                   = delivery_identity.value.type
@@ -208,7 +159,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "storage_blob_dead_letter_destination" {
-    for_each = lookup(each.value.subscription, "storage_blob_dead_letter_destination", null) != null ? { "default" = each.value.subscription.storage_blob_dead_letter_destination } : {}
+    for_each = each.value.subscription.storage_blob_dead_letter_destination != null ? { "this" = each.value.subscription.storage_blob_dead_letter_destination } : {}
 
     content {
       storage_account_id          = storage_blob_dead_letter_destination.value.storage_account_id
@@ -217,7 +168,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "storage_queue_endpoint" {
-    for_each = lookup(each.value.subscription, "storage_queue_endpoint", null) != null ? { "default" = each.value.subscription.storage_queue_endpoint } : {}
+    for_each = each.value.subscription.storage_queue_endpoint != null ? { "this" = each.value.subscription.storage_queue_endpoint } : {}
 
     content {
       storage_account_id                    = storage_queue_endpoint.value.storage_account_id
@@ -227,7 +178,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "azure_function_endpoint" {
-    for_each = lookup(each.value.subscription, "azure_function_endpoint", null) != null ? { "default" = each.value.subscription.azure_function_endpoint } : {}
+    for_each = each.value.subscription.azure_function_endpoint != null ? { "this" = each.value.subscription.azure_function_endpoint } : {}
 
     content {
       function_id                       = azure_function_endpoint.value.function_id
@@ -237,7 +188,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "webhook_endpoint" {
-    for_each = lookup(each.value.subscription, "webhook_endpoint", null) != null ? { "default" = each.value.subscription.webhook_endpoint } : {}
+    for_each = each.value.subscription.webhook_endpoint != null ? { "this" = each.value.subscription.webhook_endpoint } : {}
 
     content {
       url                               = webhook_endpoint.value.url
@@ -249,7 +200,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "retry_policy" {
-    for_each = lookup(each.value.subscription, "retry_policy", null) != null ? { "default" = each.value.subscription.retry_policy } : {}
+    for_each = each.value.subscription.retry_policy != null ? { "this" = each.value.subscription.retry_policy } : {}
 
     content {
       max_delivery_attempts = retry_policy.value.max_delivery_attempts
@@ -258,8 +209,8 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "subject_filter" {
-    for_each = contains(keys(each.value.subscription), "subject_filter") && each.value.subscription.subject_filter != null ? [each.value.subscription.subject_filter] : (
-      contains(keys(each.value.subscription), "filters") && each.value.subscription.filters != null ? [each.value.subscription.filters] : []
+    for_each = each.value.subscription.subject_filter != null ? { "this" = each.value.subscription.subject_filter } : (
+      each.value.subscription.filters != null ? { "this" = each.value.subscription.filters } : {}
     )
 
     content {
@@ -270,7 +221,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "advanced_filter" {
-    for_each = lookup(each.value.subscription, "advanced_filter", null) != null ? { "default" = each.value.subscription.advanced_filter } : {}
+    for_each = each.value.subscription.advanced_filter != null ? { "this" = each.value.subscription.advanced_filter } : {}
 
     content {
       dynamic "bool_equals" {
@@ -351,6 +302,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
           value = number_greater_than_or_equals.value
         }
       }
+
       dynamic "number_less_than" {
         for_each = advanced_filter.value.number_less_than
 
@@ -444,9 +396,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 
   dynamic "delivery_property" {
-    for_each = lookup(
-      each.value.subscription, "delivery_property_mappings", {}
-    )
+    for_each = each.value.subscription.delivery_property_mappings
 
     content {
       header_name  = delivery_property.value.header_name
@@ -460,37 +410,29 @@ resource "azurerm_eventgrid_event_subscription" "this" {
 
 # system topics
 resource "azurerm_eventgrid_system_topic" "this" {
-  for_each = lookup(
-    var.config, "system_topics", {}
-  )
+  for_each = var.eventgrid.system_topics
 
   name = coalesce(
-    each.value.name,
-    try(
-      join("-", [var.naming.eventgrid_topic, each.key]), null
-    ), each.key
+    each.value.name, each.key
   )
 
   resource_group_name = coalesce(
-    lookup(
-      var.config, "resource_group_name", null
-    ), var.resource_group_name
+    var.eventgrid.resource_group_name, var.resource_group_name
   )
 
   location = coalesce(
-    lookup(var.config, "location", null
-    ), var.location
+    var.eventgrid.location, var.location
   )
 
-  source_resource_id = coalesce(each.value.source_resource_id, each.value.source_arm_resource_id)
+  source_resource_id = each.value.source_resource_id
   topic_type         = each.value.topic_type
 
   tags = coalesce(
-    var.config.tags, var.tags
+    var.eventgrid.tags, var.tags
   )
 
   dynamic "identity" {
-    for_each = lookup(each.value, "identity", null) != null ? [each.value.identity] : []
+    for_each = each.value.identity != null ? { "this" = each.value.identity } : {}
 
     content {
       type         = identity.value.type
@@ -501,64 +443,35 @@ resource "azurerm_eventgrid_system_topic" "this" {
 
 # system topic event subscriptions
 resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
-  for_each = {
-    for item in flatten([
-      for topic_key, topic in lookup(var.config, "system_topics", {}) : [
-        for sub_key, sub in lookup(topic, "event_subscriptions", {}) : {
-          name = coalesce(
-            sub.name,
-            try(join("-", [var.naming.eventgrid_system_topic_event_subscription, sub_key]), null),
-            sub_key
-          )
-          id                                   = "${topic_key}-${sub_key}"
-          topic_key                            = topic_key
-          topic_name                           = azurerm_eventgrid_system_topic.this[topic_key].name
-          included_event_types                 = sub.included_event_types
-          event_delivery_schema                = sub.event_delivery_schema
-          webhook_endpoint                     = sub.webhook_endpoint
-          service_bus_queue_endpoint_id        = sub.service_bus_queue_endpoint_id
-          service_bus_topic_endpoint_id        = sub.service_bus_topic_endpoint_id
-          eventhub_endpoint_id                 = sub.eventhub_endpoint_id
-          subject_filter                       = sub.subject_filter
-          retry_policy                         = sub.retry_policy
-          delivery_property_mappings           = sub.delivery_property_mappings
-          labels                               = sub.labels
-          expiration_time_utc                  = sub.expiration_time_utc
-          advanced_filtering_on_arrays_enabled = sub.advanced_filtering_on_arrays_enabled
-          hybrid_connection_endpoint_id        = sub.hybrid_connection_endpoint_id
-          azure_function_endpoint              = sub.azure_function_endpoint
-          delivery_identity                    = sub.delivery_identity
-          dead_letter_identity                 = sub.dead_letter_identity
-          storage_blob_dead_letter_destination = sub.storage_blob_dead_letter_destination
-          storage_queue_endpoint               = sub.storage_queue_endpoint
-          advanced_filter                      = sub.advanced_filter
-        }
-      ]
-    ]) : item.id => item
-  }
+  for_each = merge(flatten([
+    for topic_key, topic in var.eventgrid.system_topics : {
+      for sub_key, sub in topic.event_subscriptions :
+      "${topic_key}-${sub_key}" => merge(sub, {
+        name       = coalesce(sub.name, sub_key)
+        topic_name = azurerm_eventgrid_system_topic.this[topic_key].name
+      })
+    }
+  ])...)
 
-  name = each.value.name
-
+  name         = each.value.name
   system_topic = each.value.topic_name
 
   resource_group_name = coalesce(
-    lookup(
-      var.config, "resource_group_name", null
-    ), var.resource_group_name
+    var.eventgrid.resource_group_name, var.resource_group_name
   )
 
   event_delivery_schema                = each.value.event_delivery_schema
-  included_event_types                 = each.value.included_event_types
-  service_bus_queue_endpoint_id        = each.value.service_bus_queue_endpoint_id
-  service_bus_topic_endpoint_id        = each.value.service_bus_topic_endpoint_id
-  eventhub_endpoint_id                 = each.value.eventhub_endpoint_id
   labels                               = each.value.labels
   expiration_time_utc                  = each.value.expiration_time_utc
+  included_event_types                 = each.value.included_event_types
   advanced_filtering_on_arrays_enabled = each.value.advanced_filtering_on_arrays_enabled
-  hybrid_connection_endpoint_id        = each.value.hybrid_connection_endpoint_id
+  hybrid_connection_id                 = each.value.hybrid_connection_endpoint_id
+  eventhub_id                          = each.value.eventhub_endpoint_id
+  service_bus_queue_id                 = each.value.service_bus_queue_endpoint_id
+  service_bus_topic_id                 = each.value.service_bus_topic_endpoint_id
 
   dynamic "storage_blob_dead_letter_destination" {
-    for_each = lookup(each.value, "storage_blob_dead_letter_destination", null) != null ? { "default" = each.value.storage_blob_dead_letter_destination } : {}
+    for_each = each.value.storage_blob_dead_letter_destination != null ? { "this" = each.value.storage_blob_dead_letter_destination } : {}
 
     content {
       storage_account_id          = storage_blob_dead_letter_destination.value.storage_account_id
@@ -567,7 +480,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "storage_queue_endpoint" {
-    for_each = lookup(each.value, "storage_queue_endpoint", null) != null ? { "default" = each.value.storage_queue_endpoint } : {}
+    for_each = each.value.storage_queue_endpoint != null ? { "this" = each.value.storage_queue_endpoint } : {}
 
     content {
       storage_account_id                    = storage_queue_endpoint.value.storage_account_id
@@ -577,7 +490,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "delivery_identity" {
-    for_each = lookup(each.value, "delivery_identity", null) != null ? { "default" = each.value.delivery_identity } : {}
+    for_each = each.value.delivery_identity != null ? { "this" = each.value.delivery_identity } : {}
 
     content {
       type                   = delivery_identity.value.type
@@ -586,7 +499,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "dead_letter_identity" {
-    for_each = lookup(each.value, "dead_letter_identity", null) != null ? { "default" = each.value.dead_letter_identity } : {}
+    for_each = each.value.dead_letter_identity != null ? { "this" = each.value.dead_letter_identity } : {}
 
     content {
       type                   = dead_letter_identity.value.type
@@ -595,7 +508,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "azure_function_endpoint" {
-    for_each = lookup(each.value, "azure_function_endpoint", null) != null ? { "default" = each.value.azure_function_endpoint } : {}
+    for_each = each.value.azure_function_endpoint != null ? { "this" = each.value.azure_function_endpoint } : {}
 
     content {
       function_id                       = azure_function_endpoint.value.function_id
@@ -605,7 +518,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "webhook_endpoint" {
-    for_each = lookup(each.value, "webhook_endpoint", null) != null ? { "default" = each.value.webhook_endpoint } : {}
+    for_each = each.value.webhook_endpoint != null ? { "this" = each.value.webhook_endpoint } : {}
 
     content {
       url                               = webhook_endpoint.value.url
@@ -617,7 +530,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "subject_filter" { //max 1
-    for_each = lookup(each.value, "subject_filter", null) != null ? { "default" = each.value.subject_filter } : {}
+    for_each = each.value.subject_filter != null ? { "this" = each.value.subject_filter } : {}
 
     content {
       subject_begins_with = subject_filter.value.subject_begins_with
@@ -627,7 +540,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "retry_policy" {
-    for_each = lookup(each.value, "retry_policy", null) != null ? { "default" = each.value.retry_policy } : {}
+    for_each = each.value.retry_policy != null ? { "this" = each.value.retry_policy } : {}
 
     content {
       max_delivery_attempts = retry_policy.value.max_delivery_attempts
@@ -636,7 +549,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "delivery_property" {
-    for_each = each.value.delivery_property_mappings != null ? each.value.delivery_property_mappings : {}
+    for_each = each.value.delivery_property_mappings
 
     content {
       header_name  = delivery_property.value.header_name
@@ -648,7 +561,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
   }
 
   dynamic "advanced_filter" {
-    for_each = lookup(each.value, "advanced_filter", null) != null ? { "default" = each.value.advanced_filter } : {}
+    for_each = each.value.advanced_filter != null ? { "this" = each.value.advanced_filter } : {}
 
     content {
       dynamic "bool_equals" {
@@ -825,25 +738,18 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
 
 # custom topics
 resource "azurerm_eventgrid_topic" "this" {
-  for_each = lookup(
-    var.config, "custom_topics", {}
-  )
+  for_each = var.eventgrid.custom_topics
 
   resource_group_name = coalesce(
-    lookup(
-      var.config, "resource_group_name", null
-    ), var.resource_group_name
+    var.eventgrid.resource_group_name, var.resource_group_name
   )
 
   location = coalesce(
-    lookup(var.config, "location", null
-    ), var.location
+    var.eventgrid.location, var.location
   )
 
   name = coalesce(
-    each.value.name, try(
-      join("-", [var.naming.eventgrid_topic, each.key]), null
-    ), each.key
+    each.value.name, each.key
   )
 
   input_schema                  = each.value.input_schema
@@ -851,7 +757,7 @@ resource "azurerm_eventgrid_topic" "this" {
   local_auth_enabled            = each.value.local_auth_enabled
 
   dynamic "inbound_ip_rule" {
-    for_each = lookup(each.value, "inbound_ip_rule", null) != null ? each.value.inbound_ip_rule : []
+    for_each = each.value.inbound_ip_rule
 
     content {
       ip_mask = inbound_ip_rule.value.ip_mask
@@ -860,11 +766,11 @@ resource "azurerm_eventgrid_topic" "this" {
   }
 
   tags = coalesce(
-    var.config.tags, var.tags
+    var.eventgrid.tags, var.tags
   )
 
   dynamic "identity" {
-    for_each = lookup(each.value, "identity", null) != null ? [each.value.identity] : []
+    for_each = each.value.identity != null ? { "this" = each.value.identity } : {}
 
     content {
       type         = identity.value.type
@@ -873,7 +779,7 @@ resource "azurerm_eventgrid_topic" "this" {
   }
 
   dynamic "input_mapping_fields" {
-    for_each = lookup(each.value, "input_mapping_fields", null) != null ? { "default" = each.value.input_mapping_fields } : {}
+    for_each = each.value.input_mapping_fields != null ? { "this" = each.value.input_mapping_fields } : {}
 
     content {
       id           = input_mapping_fields.value.id
@@ -886,7 +792,7 @@ resource "azurerm_eventgrid_topic" "this" {
   }
 
   dynamic "input_mapping_default_values" {
-    for_each = lookup(each.value, "input_mapping_default_values", null) != null ? { "default" = each.value.input_mapping_default_values } : {}
+    for_each = each.value.input_mapping_default_values != null ? { "this" = each.value.input_mapping_default_values } : {}
 
     content {
       data_version = input_mapping_default_values.value.data_version
@@ -895,3 +801,4 @@ resource "azurerm_eventgrid_topic" "this" {
     }
   }
 }
+
