@@ -45,6 +45,7 @@ The following resources are used by this module:
 - [azurerm_eventgrid_system_topic.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/eventgrid_system_topic) (resource)
 - [azurerm_eventgrid_system_topic_event_subscription.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/eventgrid_system_topic_event_subscription) (resource)
 - [azurerm_eventgrid_topic.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/eventgrid_topic) (resource)
+- [azurerm_eventgrid_system_topic.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/eventgrid_system_topic) (data source)
 
 ## Required Inputs
 
@@ -291,9 +292,11 @@ object({
       })), {})
     })), {})
     system_topics = optional(map(object({
-      name               = optional(string)
-      source_resource_id = optional(string)
-      topic_type         = string
+      name                = optional(string)
+      resource_group_name = optional(string)
+      use_existing_topic  = optional(bool)
+      source_resource_id  = optional(string)
+      topic_type          = optional(string)
       identity = optional(object({
         type         = string
         identity_ids = optional(list(string))

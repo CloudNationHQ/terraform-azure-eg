@@ -408,16 +408,35 @@ resource "azurerm_eventgrid_event_subscription" "this" {
   }
 }
 
-# system topics
-resource "azurerm_eventgrid_system_topic" "this" {
-  for_each = var.eventgrid.system_topics
+# existing system topics
+data "azurerm_eventgrid_system_topic" "this" {
+  for_each = {
+    for topic_key, topic in var.eventgrid.system_topics : topic_key => topic
+    if topic.use_existing_topic == true
+  }
 
   name = coalesce(
     each.value.name, each.key
   )
 
   resource_group_name = coalesce(
-    var.eventgrid.resource_group_name, var.resource_group_name
+    each.value.resource_group_name, var.eventgrid.resource_group_name, var.resource_group_name
+  )
+}
+
+# system topics
+resource "azurerm_eventgrid_system_topic" "this" {
+  for_each = {
+    for topic_key, topic in var.eventgrid.system_topics : topic_key => topic
+    if topic.use_existing_topic != true
+  }
+
+  name = coalesce(
+    each.value.name, each.key
+  )
+
+  resource_group_name = coalesce(
+    each.value.resource_group_name, var.eventgrid.resource_group_name, var.resource_group_name
   )
 
   location = coalesce(
@@ -447,18 +466,24 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
     for topic_key, topic in var.eventgrid.system_topics : {
       for sub_key, sub in topic.event_subscriptions :
       "${topic_key}-${sub_key}" => merge(sub, {
-        name       = coalesce(sub.name, sub_key)
-        topic_name = azurerm_eventgrid_system_topic.this[topic_key].name
+        name = coalesce(sub.name, sub_key)
+        topic_name = (
+          topic.use_existing_topic == true
+          ? data.azurerm_eventgrid_system_topic.this[topic_key].name
+          : azurerm_eventgrid_system_topic.this[topic_key].name
+        )
+        topic_resource_group_name = (
+          topic.use_existing_topic == true
+          ? data.azurerm_eventgrid_system_topic.this[topic_key].resource_group_name
+          : azurerm_eventgrid_system_topic.this[topic_key].resource_group_name
+        )
       })
     }
   ])...)
 
-  name         = each.value.name
-  system_topic = each.value.topic_name
-
-  resource_group_name = coalesce(
-    var.eventgrid.resource_group_name, var.resource_group_name
-  )
+  name                = each.value.name
+  system_topic        = each.value.topic_name
+  resource_group_name = each.value.topic_resource_group_name
 
   event_delivery_schema                = each.value.event_delivery_schema
   labels                               = each.value.labels

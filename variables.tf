@@ -234,9 +234,11 @@ variable "eventgrid" {
       })), {})
     })), {})
     system_topics = optional(map(object({
-      name               = optional(string)
-      source_resource_id = optional(string)
-      topic_type         = string
+      name                = optional(string)
+      resource_group_name = optional(string)
+      use_existing_topic  = optional(bool)
+      source_resource_id  = optional(string)
+      topic_type          = optional(string)
       identity = optional(object({
         type         = string
         identity_ids = optional(list(string))
@@ -419,6 +421,13 @@ variable "eventgrid" {
   validation {
     condition     = var.eventgrid.resource_group_name != null || var.resource_group_name != null
     error_message = "resource group name must be provided either in the config object or as a separate variable."
+  }
+
+  validation {
+    condition = alltrue([
+      for topic in var.eventgrid.system_topics : topic.use_existing_topic == true || topic.topic_type != null
+    ])
+    error_message = "topic_type must be provided for system topics that are not referenced with use_existing_topic."
   }
 }
 
