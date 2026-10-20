@@ -294,7 +294,7 @@ object({
     system_topics = optional(map(object({
       name                = optional(string)
       resource_group_name = optional(string)
-      use_existing_topic  = optional(bool, false)
+      use_existing_topic  = optional(bool)
       source_resource_id  = optional(string)
       topic_type          = optional(string)
       identity = optional(object({

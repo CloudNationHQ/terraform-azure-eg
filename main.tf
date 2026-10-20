@@ -412,7 +412,7 @@ resource "azurerm_eventgrid_event_subscription" "this" {
 data "azurerm_eventgrid_system_topic" "this" {
   for_each = {
     for topic_key, topic in var.eventgrid.system_topics : topic_key => topic
-    if topic.use_existing_topic
+    if topic.use_existing_topic == true
   }
 
   name = coalesce(
@@ -428,7 +428,7 @@ data "azurerm_eventgrid_system_topic" "this" {
 resource "azurerm_eventgrid_system_topic" "this" {
   for_each = {
     for topic_key, topic in var.eventgrid.system_topics : topic_key => topic
-    if !topic.use_existing_topic
+    if topic.use_existing_topic != true
   }
 
   name = coalesce(
@@ -468,12 +468,12 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "this" {
       "${topic_key}-${sub_key}" => merge(sub, {
         name = coalesce(sub.name, sub_key)
         topic_name = (
-          topic.use_existing_topic
+          topic.use_existing_topic == true
           ? data.azurerm_eventgrid_system_topic.this[topic_key].name
           : azurerm_eventgrid_system_topic.this[topic_key].name
         )
         topic_resource_group_name = (
-          topic.use_existing_topic
+          topic.use_existing_topic == true
           ? data.azurerm_eventgrid_system_topic.this[topic_key].resource_group_name
           : azurerm_eventgrid_system_topic.this[topic_key].resource_group_name
         )
