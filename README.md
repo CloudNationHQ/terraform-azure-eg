@@ -66,6 +66,8 @@ object({
     auto_delete_topic_with_last_subscription  = optional(bool)
     local_auth_enabled                        = optional(bool)
     auto_create_topic_with_first_subscription = optional(bool)
+    minimum_tls_version                       = optional(string)
+    data_residency_boundary                   = optional(string)
     identity = optional(object({
       type         = string
       identity_ids = optional(list(string))
@@ -183,6 +185,8 @@ object({
       input_schema                  = optional(string)
       public_network_access_enabled = optional(bool)
       local_auth_enabled            = optional(bool)
+      minimum_tls_version           = optional(string)
+      data_residency_boundary       = optional(string)
       inbound_ip_rule = optional(list(object({
         ip_mask = string
         action  = optional(string)
