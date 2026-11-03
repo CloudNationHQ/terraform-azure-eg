@@ -60,6 +60,8 @@ resource "azurerm_eventgrid_domain" "this" {
   auto_delete_topic_with_last_subscription  = var.eventgrid.auto_delete_topic_with_last_subscription
   local_auth_enabled                        = var.eventgrid.local_auth_enabled
   auto_create_topic_with_first_subscription = var.eventgrid.auto_create_topic_with_first_subscription
+  minimum_tls_version                       = var.eventgrid.minimum_tls_version
+  data_residency_boundary                   = var.eventgrid.data_residency_boundary
 
   tags = coalesce(
     var.eventgrid.tags, var.tags
@@ -755,6 +757,8 @@ resource "azurerm_eventgrid_topic" "this" {
   input_schema                  = each.value.input_schema
   public_network_access_enabled = each.value.public_network_access_enabled
   local_auth_enabled            = each.value.local_auth_enabled
+  minimum_tls_version           = each.value.minimum_tls_version
+  data_residency_boundary       = each.value.data_residency_boundary
 
   dynamic "inbound_ip_rule" {
     for_each = each.value.inbound_ip_rule
