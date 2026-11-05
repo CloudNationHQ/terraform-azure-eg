@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v3.0.0...v3.1.0) (2026-11-05)
+
+
+### Features
+
+* add minimum_tls_version and data_residency_boundary to domains and topics ([#65](https://github.com/CloudNationHQ/terraform-azure-eg/issues/65)) ([d6edb54](https://github.com/CloudNationHQ/terraform-azure-eg/commit/d6edb54b063838b28fd96f02138bbb6f057582e5)), closes [#64](https://github.com/CloudNationHQ/terraform-azure-eg/issues/64)
+
 ## [3.0.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.4.0...v3.0.0) (2026-09-15)
 
 
