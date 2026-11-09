@@ -531,7 +531,7 @@ Description: contains system topic event subscriptions configuration
 
 ### <a name="output_system_topics"></a> [system\_topics](#output\_system\_topics)
 
-Description: contains system topics configuration
+Description: contains all system topics, existing and new
 <!-- END_TF_DOCS -->
 
 ## Goals

@@ -15,8 +15,8 @@ output "event_subscriptions" {
 }
 
 output "system_topics" {
-  description = "contains system topics configuration"
-  value       = azurerm_eventgrid_system_topic.this
+  description = "contains all system topics, existing and new"
+  value       = merge(azurerm_eventgrid_system_topic.this, data.azurerm_eventgrid_system_topic.this)
 }
 
 output "system_topic_event_subscriptions" {
