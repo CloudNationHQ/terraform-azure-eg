@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.1.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v3.0.0...v3.1.0) (2026-11-11)
+
+
+### Features
+
+* add minimum_tls_version and data_residency_boundary to domains and topics ([#65](https://github.com/CloudNationHQ/terraform-azure-eg/issues/65)) ([d6edb54](https://github.com/CloudNationHQ/terraform-azure-eg/commit/d6edb54b063838b28fd96f02138bbb6f057582e5)), closes [#64](https://github.com/CloudNationHQ/terraform-azure-eg/issues/64)
+* **deps:** bump golang.org/x/crypto from 0.36.0 to 0.45.0 in /tests ([#55](https://github.com/CloudNationHQ/terraform-azure-eg/issues/55)) ([adb3531](https://github.com/CloudNationHQ/terraform-azure-eg/commit/adb35316dd8d25b6690c9b11c5074bf41b2f7b8a))
+* support referencing an existing system topic via use_existing_topic ([#63](https://github.com/CloudNationHQ/terraform-azure-eg/issues/63)) ([f7a75c8](https://github.com/CloudNationHQ/terraform-azure-eg/commit/f7a75c8b94e6075950dad7de53614de39a1110fc))
+
 ## [3.0.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.4.0...v3.0.0) (2026-09-15)
 
 
