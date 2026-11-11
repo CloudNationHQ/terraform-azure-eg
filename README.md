@@ -27,13 +27,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 5.0)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 4.0)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 5.0)
 
 ## Resources
 
@@ -45,12 +45,13 @@ The following resources are used by this module:
 - [azurerm_eventgrid_system_topic.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/eventgrid_system_topic) (resource)
 - [azurerm_eventgrid_system_topic_event_subscription.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/eventgrid_system_topic_event_subscription) (resource)
 - [azurerm_eventgrid_topic.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/eventgrid_topic) (resource)
+- [azurerm_eventgrid_system_topic.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/eventgrid_system_topic) (data source)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_config"></a> [config](#input\_config)
+### <a name="input_eventgrid"></a> [eventgrid](#input\_eventgrid)
 
 Description: Contains all eventgrid configuration
 
@@ -58,14 +59,16 @@ Type:
 
 ```hcl
 object({
-    resource_group_name = optional(string)
-    location            = optional(string)
-    tags                = optional(map(string))
-    input_schema                              = optional(string, "EventGridSchema")
-    public_network_access_enabled             = optional(bool, true)
-    auto_delete_topic_with_last_subscription  = optional(bool, false)
-    local_auth_enabled                        = optional(bool, false)
-    auto_create_topic_with_first_subscription = optional(bool, false)
+    resource_group_name                       = optional(string)
+    location                                  = optional(string)
+    tags                                      = optional(map(string))
+    input_schema                              = optional(string)
+    public_network_access_enabled             = optional(bool)
+    auto_delete_topic_with_last_subscription  = optional(bool)
+    local_auth_enabled                        = optional(bool)
+    auto_create_topic_with_first_subscription = optional(bool)
+    minimum_tls_version                       = optional(string)
+    data_residency_boundary                   = optional(string)
     identity = optional(object({
       type         = string
       identity_ids = optional(list(string))
@@ -74,8 +77,8 @@ object({
       name = optional(string)
       inbound_ip_rule = optional(list(object({
         ip_mask = string
-        action  = optional(string, "Allow")
-      })))
+        action  = optional(string)
+      })), [])
       input_mapping_default_values = optional(object({
         data_version = optional(string)
         event_type   = optional(string)
@@ -94,11 +97,11 @@ object({
         event_subscriptions = optional(map(object({
           name                                 = optional(string)
           event_delivery_schema                = optional(string)
-          included_event_types                 = optional(list(string))
           labels                               = optional(list(string))
-          hybrid_connection_endpoint_id        = optional(string)
-          advanced_filtering_on_arrays_enabled = optional(bool, false)
           expiration_time_utc                  = optional(string)
+          included_event_types                 = optional(list(string))
+          advanced_filtering_on_arrays_enabled = optional(bool)
+          hybrid_connection_endpoint_id        = optional(string)
           service_bus_queue_endpoint_id        = optional(string)
           service_bus_topic_endpoint_id        = optional(string)
           eventhub_endpoint_id                 = optional(string)
@@ -180,12 +183,14 @@ object({
     })), {})
     custom_topics = optional(map(object({
       name                          = optional(string)
-      input_schema                  = optional(string, "EventGridSchema")
-      public_network_access_enabled = optional(bool, true)
-      local_auth_enabled            = optional(bool, false)
+      input_schema                  = optional(string)
+      public_network_access_enabled = optional(bool)
+      local_auth_enabled            = optional(bool)
+      minimum_tls_version           = optional(string)
+      data_residency_boundary       = optional(string)
       inbound_ip_rule = optional(list(object({
         ip_mask = string
-        action  = optional(string, "Allow")
+        action  = optional(string)
       })))
       identity = optional(object({
         type         = string
@@ -207,11 +212,11 @@ object({
       event_subscriptions = optional(map(object({
         name                                 = optional(string)
         event_delivery_schema                = optional(string)
-        included_event_types                 = optional(list(string))
         labels                               = optional(list(string))
-        hybrid_connection_endpoint_id        = optional(string)
-        advanced_filtering_on_arrays_enabled = optional(bool, false)
         expiration_time_utc                  = optional(string)
+        included_event_types                 = optional(list(string))
+        advanced_filtering_on_arrays_enabled = optional(bool)
+        hybrid_connection_endpoint_id        = optional(string)
         service_bus_queue_endpoint_id        = optional(string)
         service_bus_topic_endpoint_id        = optional(string)
         eventhub_endpoint_id                 = optional(string)
@@ -291,25 +296,26 @@ object({
       })), {})
     })), {})
     system_topics = optional(map(object({
-      name                   = optional(string)
-      source_arm_resource_id = optional(string)
-      source_resource_id     = optional(string)
-      topic_type             = string
+      name                = optional(string)
+      resource_group_name = optional(string)
+      use_existing_topic  = optional(bool)
+      source_resource_id  = optional(string)
+      topic_type          = optional(string)
       identity = optional(object({
         type         = string
         identity_ids = optional(list(string))
       }))
       event_subscriptions = optional(map(object({
         name                                 = optional(string)
-        included_event_types                 = optional(list(string), [])
         event_delivery_schema                = optional(string)
+        labels                               = optional(list(string), [])
+        expiration_time_utc                  = optional(string)
+        included_event_types                 = optional(list(string))
+        advanced_filtering_on_arrays_enabled = optional(bool)
+        hybrid_connection_endpoint_id        = optional(string)
         service_bus_queue_endpoint_id        = optional(string)
         service_bus_topic_endpoint_id        = optional(string)
         eventhub_endpoint_id                 = optional(string)
-        labels                               = optional(list(string), [])
-        expiration_time_utc                  = optional(string)
-        advanced_filtering_on_arrays_enabled = optional(bool, false)
-        hybrid_connection_endpoint_id        = optional(string)
         delivery_property_mappings = optional(map(object({
           header_name  = string
           type         = string
@@ -386,11 +392,11 @@ object({
       name                                 = optional(string)
       scope                                = string
       event_delivery_schema                = optional(string)
-      included_event_types                 = optional(list(string))
       labels                               = optional(list(string))
       hybrid_connection_endpoint_id        = optional(string)
-      advanced_filtering_on_arrays_enabled = optional(bool, false)
       expiration_time_utc                  = optional(string)
+      included_event_types                 = optional(list(string))
+      advanced_filtering_on_arrays_enabled = optional(bool)
       service_bus_queue_endpoint_id        = optional(string)
       service_bus_topic_endpoint_id        = optional(string)
       eventhub_endpoint_id                 = optional(string)
@@ -483,14 +489,6 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_naming"></a> [naming](#input\_naming)
-
-Description: contains naming convention
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
 Description: default resource group to be used.
@@ -533,7 +531,7 @@ Description: contains system topic event subscriptions configuration
 
 ### <a name="output_system_topics"></a> [system\_topics](#output\_system\_topics)
 
-Description: contains system topics configuration
+Description: contains all system topics, existing and new
 <!-- END_TF_DOCS -->
 
 ## Goals
@@ -550,17 +548,13 @@ Using a dedicated module, we've developed a naming convention for resources that
 
 Full examples detailing all usages, along with integrations with dependency modules, are located in the examples directory.
 
-To update the module's documentation run `make doc`
+To update the module's documentation run `make docs`
 
 ## Contributors
 
 We welcome contributions from the community! Whether it's reporting a bug, suggesting a new feature, or submitting a pull request, your input is highly valued.
 
-For more information, please see our contribution [guidelines](./CONTRIBUTING.md). <br><br>
-
-<a href="https://github.com/cloudnationhq/terraform-azure-eg/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cloudnationhq/terraform-azure-eg" />
-</a>
+For more information, please see our contribution [guidelines](./CONTRIBUTING.md).
 
 ## License
 
@@ -570,4 +564,3 @@ MIT Licensed. See [LICENSE](./LICENSE) for full details.
 
 - [Documentation](https://learn.microsoft.com/en-us/azure/event-grid/)
 - [Rest Api](https://learn.microsoft.com/en-us/rest/api/eventgrid/)
-- [Rest Api Specs](https://github.com/hashicorp/pandora/tree/main/api-definitions/resource-manager/EventGrid)

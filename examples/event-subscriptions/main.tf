@@ -1,13 +1,13 @@
 module "naming" {
   source  = "cloudnationhq/naming/azure"
-  version = "~> 0.24"
+  version = "~> 0.32"
 
   suffix = ["demo", "dev"]
 }
 
 module "rg" {
   source  = "cloudnationhq/rg/azure"
-  version = "~> 2.0"
+  version = "~> 3.0"
 
   groups = {
     demo = {
@@ -19,9 +19,8 @@ module "rg" {
 
 module "storage" {
   source  = "cloudnationhq/sa/azure"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
-  naming = local.naming
 
   storage = {
     name                = module.naming.storage_account.name_unique
@@ -48,11 +47,10 @@ module "storage" {
 
 module "servicebus" {
   source  = "cloudnationhq/sb/azure"
-  version = "~> 2.0"
+  version = "~> 3.0"
 
-  naming = local.naming
 
-  config = {
+  servicebus_namespace = {
     name                = module.naming.servicebus_namespace.name_unique
     resource_group_name = module.rg.groups.demo.name
     location            = module.rg.groups.demo.location
@@ -69,11 +67,9 @@ module "servicebus" {
 
 module "eventgrid" {
   source  = "cloudnationhq/eg/azure"
-  version = "~> 2.0"
+  version = "~> 3.0"
 
-  naming = local.naming
-
-  config = {
+  eventgrid = {
     name                = module.naming.eventgrid_domain.name
     resource_group_name = module.rg.groups.demo.name
     location            = module.rg.groups.demo.location

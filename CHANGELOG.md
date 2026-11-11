@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.4.0...v3.0.0) (2026-09-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* this change causes recreates
+
+### Features
+
+* azurerm provider 5 upgrade ([#59](https://github.com/CloudNationHQ/terraform-azure-eg/issues/59)) ([4485503](https://github.com/CloudNationHQ/terraform-azure-eg/commit/4485503644b39664b9234f149c7df29a8756e6ab))
+
 ## [2.4.0](https://github.com/CloudNationHQ/terraform-azure-eg/compare/v2.3.0...v2.4.0) (2025-10-13)
 
 
